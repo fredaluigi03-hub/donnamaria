@@ -1,0 +1,233 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ---------------------------------------------------------------------- */
+/*  Design tokens — the single source of truth for the visual language.   */
+/*  Tailwind v4 is CSS-first: everything under @theme becomes a Tailwind  */
+/*  utility (bg-primary, text-foreground, rounded-md, font-display, etc). */
+/*  Light-mode values are the exact palette from docs/03_DESIGN_SYSTEM.md */
+/*  ("Primary/Secondary Background", "Surface", "Primary/Secondary Text", */
+/*  "Accent", "Success", "Border"). Dark mode isn't specified in that doc */
+/*  — the values below are my own derivation, same relationships/warmth,  */
+/*  flagged here so they get a design pass of their own rather than being */
+/*  mistaken for documented values.                                      */
+/* ---------------------------------------------------------------------- */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.5rem;
+
+  /* Primary Background / Primary Text — docs/03_DESIGN_SYSTEM.md */
+  --background: #faf8f5;
+  --foreground: #181818;
+
+  /* Surface — "Cards only when necessary" */
+  --card: #ffffff;
+  --card-foreground: #181818;
+
+  --popover: #ffffff;
+  --popover-foreground: #181818;
+
+  /* Buttons are ink-on-background, not brand-colored — the doc's Accent
+     is reserved for the `--gold` token below, used sparingly. */
+  --primary: #181818;
+  --primary-foreground: #faf8f5;
+
+  /* Secondary Background — "used to separate sections" */
+  --secondary: #f2eee8;
+  --secondary-foreground: #181818;
+
+  /* Neutral hover surface (shadcn's generic "accent" slot) — deliberately
+     NOT the brand Accent color below, so ghost/outline hover states never
+     read as the bronze brand accent "dominating". */
+  --accent: #f2eee8;
+  --accent-foreground: #181818;
+
+  --muted: #f2eee8;
+  --muted-foreground: #6f6f6f;
+
+  --destructive: #c1483b;
+  --destructive-foreground: #faf8f5;
+
+  /* Success — docs/03_DESIGN_SYSTEM.md */
+  --success: #5f7d61;
+  --success-foreground: #faf8f5;
+
+  --warning: #c08a3e;
+  --warning-foreground: #181818;
+
+  /* Border — docs/03_DESIGN_SYSTEM.md (literal rgba) */
+  --border: rgba(24, 24, 24, 0.08);
+  --input: rgba(24, 24, 24, 0.08);
+  --ring: #181818;
+
+  /* Accent — "warm champagne bronze, use sparingly, never dominate".
+     Kept under its existing `--gold` name since every call site already
+     references it that way (Hero kicker, room accent, small icon tints). */
+  --gold: #b8956a;
+  --gold-foreground: #faf8f5;
+
+  /* Not in docs/03 — kept as a deliberate, already-wired addition (the
+     Wellness section badge needs a color distinct from --success so a
+     category tag is never confused with a form-validation state). */
+  --forest: #33482f;
+  --forest-foreground: #faf8f5;
+
+  /* Per-room accent colors — also not in docs/03, unchanged from the
+     original brief (oro/blu/rosa per Suite/Domi/Mery). */
+  --room-suite: hsl(36 50% 45%);
+  --room-suite-foreground: hsl(40 30% 98%);
+  --room-domi: hsl(210 42% 38%);
+  --room-domi-foreground: hsl(40 30% 98%);
+  --room-mery: hsl(345 48% 80%);
+  --room-mery-foreground: hsl(345 35% 25%);
+
+  /* Motion tokens — see docs/02_CREATIVE_DIRECTION.md (Motion Direction) */
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-emphatic: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 200ms;
+  --duration-base: 400ms;
+  --duration-slow: 700ms;
+}
+
+.dark {
+  --background: #1a1714;
+  --foreground: #f5f1ea;
+
+  --card: #211d18;
+  --card-foreground: #f5f1ea;
+
+  --popover: #211d18;
+  --popover-foreground: #f5f1ea;
+
+  --primary: #f5f1ea;
+  --primary-foreground: #1a1714;
+
+  --secondary: #26221c;
+  --secondary-foreground: #f5f1ea;
+
+  --accent: #26221c;
+  --accent-foreground: #f5f1ea;
+
+  --muted: #26221c;
+  --muted-foreground: #a8a096;
+
+  --destructive: #d9695c;
+  --destructive-foreground: #1a1714;
+
+  --success: #7fa084;
+  --success-foreground: #142016;
+
+  --warning: #d6a15c;
+  --warning-foreground: #1a1714;
+
+  --border: rgba(245, 241, 234, 0.1);
+  --input: rgba(245, 241, 234, 0.1);
+  --ring: #f5f1ea;
+
+  --gold: #c9a876;
+  --gold-foreground: #1a1714;
+  --forest: #4c6b52;
+  --forest-foreground: #f5f1ea;
+
+  --room-suite: hsl(38 60% 58%);
+  --room-suite-foreground: hsl(220 18% 10%);
+  --room-domi: hsl(210 55% 62%);
+  --room-domi-foreground: hsl(220 18% 10%);
+  --room-mery: hsl(345 45% 70%);
+  --room-mery-foreground: hsl(345 25% 15%);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+
+  --color-forest: var(--forest);
+  --color-forest-foreground: var(--forest-foreground);
+
+  --color-room-suite: var(--room-suite);
+  --color-room-suite-foreground: var(--room-suite-foreground);
+  --color-room-domi: var(--room-domi);
+  --color-room-domi-foreground: var(--room-domi-foreground);
+  --color-room-mery: var(--room-mery);
+  --color-room-mery-foreground: var(--room-mery-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+
+  --container-2xl: 1400px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: auto; /* Lenis owns smooth scrolling; see SmoothScroll */
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+}
+
+@layer utilities {
+  /* Respect reduced-motion preferences everywhere. Every animation
+     primitive in components/animations checks this at the JS level too,
+     but this is the CSS-level backstop. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
