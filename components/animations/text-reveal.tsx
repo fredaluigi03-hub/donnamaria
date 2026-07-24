@@ -1,10 +1,11 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, type Variants } from "motion/react";
 import type { ElementType } from "react";
 
 import { staggerContainer } from "@/lib/animations";
 import { useMounted } from "@/hooks/use-mounted";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface TextRevealProps {
   text: string;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -13,6 +13,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export function Header() {
   const [open, setOpen] = useState(false);

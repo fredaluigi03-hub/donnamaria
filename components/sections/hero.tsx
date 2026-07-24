@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -12,8 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { TextReveal } from "@/components/animations/text-reveal";
 import { FadeIn } from "@/components/animations/fade-in";
 import { BackgroundVideo } from "@/components/animations/background-video";
+import { ScrollScrubSequence } from "@/components/animations/scroll-scrub-sequence";
 import { useMounted } from "@/hooks/use-mounted";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { MOTION } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +23,12 @@ export interface HeroCta {
   label: string;
   href: string;
 }
+
+// How much extra scroll (in viewport heights) the hero consumes while
+// pinned and scrubbing through `scrubFrames` before releasing into normal
+// scroll — long enough to read as "the video plays as I scroll", short
+// enough not to feel like scroll-jacking.
+const SCRUB_TRACK_VH = 140;
 
 export interface HeroProps {
   title: string;
@@ -30,6 +38,14 @@ export interface HeroProps {
   imageAlt: string;
   /** Optional cinematic background video (homepage only) — imageSrc is kept as its poster/fallback. */
   videoSrc?: string;
+  /**
+   * Optional scroll-scrubbed frame sequence (homepage only), preferred over
+   * `videoSrc` when both are set — see ScrollScrubSequence for why: no
+   * autoplay/loop restart, motion only happens because the visitor is
+   * scrolling, and it naturally reverses on scroll-up. Frames must live at
+   * `${basePath}-XXX.${extension}`, 1-indexed and zero-padded to 3 digits.
+   */
+  scrubFrames?: { basePath: string; count: number; extension?: string };
   primaryCta?: HeroCta;
   secondaryCta?: HeroCta;
   /** "fullscreen" for the homepage; "compact" for room/gallery page headers. */
@@ -42,9 +58,11 @@ export interface HeroProps {
  * transparent navbar overlaps the background instead of pushing it down —
  * see Header's `transparent` state, which only activates on "/".
  *
- * The "fullscreen" variant (homepage only) is centered, video-backed
- * (falling back to a static image when no video/`prefers-reduced-motion`),
- * and follows the entrance timeline + restrained motion from
+ * The "fullscreen" variant (homepage only) is centered, backed by a
+ * scroll-scrubbed frame sequence when `scrubFrames` is set (falling back to
+ * `videoSrc`'s autoplaying loop, then to a static image + Ken Burns when
+ * there's no motion source or `prefers-reduced-motion`/mobile applies), and
+ * follows the entrance timeline + restrained motion from
  * docs/02_CREATIVE_DIRECTION.md. "compact" (room/gallery/la-struttura
  * headers) is left pixel-identical to before.
  */
@@ -55,6 +73,7 @@ export function Hero({
   imageSrc,
   imageAlt,
   videoSrc,
+  scrubFrames,
   primaryCta,
   secondaryCta,
   variant = "fullscreen",
@@ -68,29 +87,60 @@ export function Hero({
   const isMobile = useMediaQuery("(max-width: 767px)");
   const isFullscreen = variant === "fullscreen";
   const sectionRef = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
 
-  // On mobile, skip the (heavier) video entirely and use a slow Ken Burns
-  // on the static poster instead — a deliberate performance trade-off, not
-  // an accident. `mounted` still gates it so `isMobile`'s eventual real
-  // value never causes a DOM-tree hydration mismatch (see the video gate
-  // below for the same reasoning).
+  // On mobile, skip the (heavier) video/frame-sequence entirely and use a
+  // slow Ken Burns on the static poster instead — a deliberate performance
+  // trade-off, not an accident. `mounted` still gates it so `isMobile`'s
+  // eventual real value never causes a DOM-tree hydration mismatch (see the
+  // gates below for the same reasoning). `scrubFrames` wins over `videoSrc`
+  // when both are present.
+  const hasMotionBackground = !!scrubFrames || !!videoSrc;
+  const showScrub =
+    isFullscreen && !!scrubFrames && mounted && !shouldReduceMotion && !isMobile;
   const showVideo =
-    isFullscreen && !!videoSrc && mounted && !shouldReduceMotion && !isMobile;
+    isFullscreen &&
+    !scrubFrames &&
+    !!videoSrc &&
+    mounted &&
+    !shouldReduceMotion &&
+    !isMobile;
   const showKenBurns =
-    isFullscreen && mounted && !shouldReduceMotion && (isMobile || !videoSrc);
+    isFullscreen && mounted && !shouldReduceMotion && (isMobile || !hasMotionBackground);
+
+  // When the frame sequence is actually driving the background, the hero
+  // pins in place for an extra stretch of scroll (`SCRUB_TRACK_VH`) instead
+  // of scrolling away immediately — so scrubbing the video and leaving the
+  // hero become two distinct, sequential moments instead of happening on
+  // top of each other. Scroll up and the same track plays it back in
+  // reverse before handing control back to normal scrolling.
+  const isPinned = showScrub;
+  // Fraction of the pinned track spent scrubbing frames; the remainder is
+  // a brief release flourish (fade/zoom) right before the pin lets go and
+  // normal scrolling carries the visitor into the next section.
+  const SCRUB_END = 0.85;
 
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
+    target: isPinned ? pinRef : sectionRef,
     offset: ["start start", "end start"],
   });
-  const scrollOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.45]);
-  const scrollY = useTransform(scrollYProgress, [0, 1], [0, 36]);
+  // Drives the frame sequence — finishes scrubbing at `SCRUB_END` so the
+  // last stretch of the pin is a clean held frame, not a scrub still
+  // trickling in right as the exit flourish starts.
+  const frameProgress = useTransform(scrollYProgress, [0, isPinned ? SCRUB_END : 1], [0, 1]);
+  const exitStart = isPinned ? SCRUB_END : 0;
+  const scrollOpacity = useTransform(scrollYProgress, [exitStart, 1], [1, 0.45]);
+  const scrollY = useTransform(scrollYProgress, [exitStart, 1], [0, 36]);
   // Subtle "parallax on exit" for the background itself (video or image) —
   // transform-only (scale/opacity), never top/left, so it stays GPU-cheap.
-  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1, 1.08]);
-  const backgroundOpacity = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+  // No zoom (1, not 1.08/1.02) — the frame sequence is already at its
+  // native resolution here, and any upscale on the last held frame
+  // visibly softens it right as it hands off to the next section. Just
+  // the opacity fade carries the exit now.
+  const backgroundScale = useTransform(scrollYProgress, [exitStart, 1], [1, 1]);
+  const backgroundOpacity = useTransform(scrollYProgress, [exitStart, 1], [1, 0.85]);
 
-  return (
+  const heroSection = (
     <section
       ref={sectionRef}
       className={cn(
@@ -98,6 +148,9 @@ export function Hero({
         isFullscreen
           ? "min-h-dvh justify-center"
           : "min-h-[65vh] justify-end md:min-h-[75vh]",
+        // Pins to the viewport while the outer track (below) supplies the
+        // extra scroll distance to scrub through — see `isPinned` above.
+        isFullscreen && "sticky top-0",
       )}
     >
       {/* Background layer — the "parallax on exit" wrapper (scale/opacity
@@ -135,11 +188,19 @@ export function Hero({
         </motion.div>
 
         {/* Gated on `mounted` (not just `useReducedMotion()`/`isMobile`) —
-            those resolve after hydration, so mounting/unmounting the video
-            tree based on them directly would make the server and the
-            client's first paint disagree on the DOM tree. `useMounted()`
-            is false on both, so the video only appears in a safe,
-            post-hydration render. */}
+            those resolve after hydration, so mounting/unmounting the
+            video/scrub tree based on them directly would make the server
+            and the client's first paint disagree on the DOM tree.
+            `useMounted()` is false on both, so this only appears in a
+            safe, post-hydration render. */}
+        {showScrub && scrubFrames && (
+          <ScrollScrubSequence
+            basePath={scrubFrames.basePath}
+            frameCount={scrubFrames.count}
+            extension={scrubFrames.extension}
+            progress={frameProgress}
+          />
+        )}
         {showVideo && videoSrc && <BackgroundVideo src={videoSrc} poster={imageSrc} />}
       </motion.div>
 
@@ -285,6 +346,24 @@ export function Hero({
         </FadeIn>
       )}
     </section>
+  );
+
+  // Fullscreen only: wrap in a taller track so the section above can pin
+  // (`sticky top-0`) for the scrub duration instead of scrolling away
+  // immediately. Height is only ever stretched when actually pinning
+  // (`isPinned`) — otherwise this wrapper is inert (auto height, sticky
+  // behaves like static) and every non-scrub path (mobile, reduced motion,
+  // `videoSrc` fallback, no motion source) looks exactly as it did before.
+  return isFullscreen ? (
+    <div
+      ref={pinRef}
+      className="relative"
+      style={isPinned ? { height: `${SCRUB_TRACK_VH}vh` } : undefined}
+    >
+      {heroSection}
+    </div>
+  ) : (
+    heroSection
   );
 }
 

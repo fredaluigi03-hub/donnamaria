@@ -1,6 +1,8 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
+import { motion, type HTMLMotionProps } from "motion/react";
+
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface HoverScaleProps extends HTMLMotionProps<"div"> {
   scale?: number;

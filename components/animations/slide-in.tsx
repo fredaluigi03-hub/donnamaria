@@ -1,12 +1,13 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
+import { motion, type HTMLMotionProps } from "motion/react";
 
 import {
   fadeVariants,
   slideInLeftVariants,
   slideInRightVariants,
 } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface SlideInProps extends HTMLMotionProps<"div"> {
   direction?: "left" | "right";

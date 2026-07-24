@@ -1,8 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
+import { motion, type HTMLMotionProps } from "motion/react";
 
 import { fadeUpVariants, fadeVariants } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface FadeInProps extends HTMLMotionProps<"div"> {
   /** Vertical offset in px the element rises from. Set 0 for a plain fade. */

@@ -2,6 +2,7 @@ import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/booking/search-widget";
 import { Container } from "@/components/ui/container";
 import { OutdoorExperience } from "@/components/sections/outdoor-experience";
+import { PoolShowcase } from "@/components/sections/pool-showcase";
 import { RoomsShowcase } from "@/components/sections/rooms-showcase";
 import { WellnessShowcase } from "@/components/sections/wellness-showcase";
 import { Features } from "@/components/sections/features";
@@ -50,7 +51,7 @@ export default function HomePage() {
         subtitle="Suite eleganti, piscina panoramica, jacuzzi e sauna: un'ospitalità autentica a Serino, nel cuore verde della Campania."
         imageSrc="/images/hero-fallback.webp"
         imageAlt="Jacuzzi panoramica al tramonto di Donna Maria Suite & Relax"
-        videoSrc="/videos/hero.mp4"
+        scrubFrames={{ basePath: "/images/hero-frames/frame", count: 60 }}
         primaryCta={{ label: "Prenota Ora", href: "/contatti#richiedi-disponibilita" }}
         secondaryCta={{ label: "Scopri le Camere", href: "/camere" }}
       />
@@ -61,6 +62,7 @@ export default function HomePage() {
       </Container>
 
       <OutdoorExperience />
+      <PoolShowcase />
       <WellnessShowcase />
       <RoomsShowcase />
       <Features />

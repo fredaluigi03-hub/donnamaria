@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { useLenis } from "lenis/react";
 import { ArrowRight } from "lucide-react";
 
@@ -14,6 +14,7 @@ import { FadeIn } from "@/components/animations/fade-in";
 import { BackgroundVideo } from "@/components/animations/background-video";
 import { useMounted } from "@/hooks/use-mounted";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { MOTION } from "@/lib/constants";
 
 // Matches the `scroll-mt-*` reserved on the target sections below — kept as

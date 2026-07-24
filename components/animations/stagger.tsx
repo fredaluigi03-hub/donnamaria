@@ -1,9 +1,10 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
+import { motion, type HTMLMotionProps } from "motion/react";
 import type { ReactNode } from "react";
 
 import { fadeUpVariants, staggerContainer } from "@/lib/animations";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface StaggerProps extends HTMLMotionProps<"div"> {
   children: ReactNode;

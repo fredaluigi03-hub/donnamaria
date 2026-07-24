@@ -1,10 +1,11 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 import { MOTION } from "@/lib/constants";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface RevealProps {
   children: ReactNode;
@@ -21,9 +22,10 @@ export interface RevealProps {
 export function Reveal({ children, className, delay = 0, once = true }: RevealProps) {
   const shouldReduceMotion = useReducedMotion();
 
-  if (shouldReduceMotion) {
-    return <div className={className}>{children}</div>;
-  }
+  // Test temporaneo
+// if (shouldReduceMotion) {
+//   return <div className={className}>{children}</div>;
+// }
 
   return (
     <div className={cn("relative overflow-hidden", className)}>

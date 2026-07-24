@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
@@ -7,6 +9,10 @@ import { FadeIn } from "@/components/animations/fade-in";
 import { Reveal } from "@/components/animations/reveal";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
 import { HoverScale } from "@/components/animations/hover-scale";
+import { BackgroundVideo } from "@/components/animations/background-video";
+import { useMounted } from "@/hooks/use-mounted";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const gallery = [
   { src: "/images/pool/piscina2.png", alt: "Vista laterale della piscina" },
@@ -14,8 +20,18 @@ const gallery = [
   { src: "/images/pool/piscina4.png", alt: "Dettaglio della piscina al tramonto" },
 ];
 
-/** "Piscina" — large reveal photo + a small triptych of detail shots. */
+/**
+ * "Piscina" — large reveal panel backed by pool.mp4 (falls back to the
+ * static panoramic photo on mobile / `prefers-reduced-motion`, same
+ * mounted-gated pattern as Hero and OutdoorExperience) + a small triptych
+ * of static detail shots.
+ */
 export function PoolShowcase() {
+  const shouldReduceMotion = useReducedMotion();
+  const mounted = useMounted();
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const showVideo = mounted && !shouldReduceMotion && !isMobile;
+
   return (
     <Section className="bg-secondary/30">
       <Container>
@@ -46,6 +62,9 @@ export function PoolShowcase() {
                 sizes="(min-width: 1024px) 66vw, 100vw"
                 className="object-cover"
               />
+              {showVideo && (
+                <BackgroundVideo src="/videos/pool.mp4" poster="/images/pool/hero.png" />
+              )}
             </div>
           </Reveal>
 
