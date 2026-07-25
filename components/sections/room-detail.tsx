@@ -5,18 +5,27 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/sections/hero";
-import { LightboxGrid } from "@/components/sections/lightbox-grid";
+import { RoomGalleryCoverflow } from "@/components/sections/room-gallery-coverflow";
 import { RoomMeta } from "@/components/sections/room-meta";
+import { RoomNav } from "@/components/sections/room-nav";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
+import { rooms } from "@/config/rooms";
 import type { Room } from "@/types";
 
 /**
  * Shared layout for the three room detail pages — data-driven from
  * config/rooms.ts so each page.tsx stays a one-line composition instead of
- * ~150 lines of near-identical markup.
+ * ~150 lines of near-identical markup. Stays a Server Component: `room`
+ * carries lucide-react icon components (amenities), which can only be
+ * rendered as JSX here, not passed as a prop into a "use client" component
+ * (see RoomNav for the one part of this page that does need the client).
  */
 export function RoomDetail({ room }: { room: Room }) {
+  const otherRooms = rooms
+    .filter((candidate) => candidate.slug !== room.slug)
+    .map((candidate) => ({ slug: candidate.slug, name: candidate.name }));
+
   return (
     <>
       <Hero
@@ -77,9 +86,11 @@ export function RoomDetail({ room }: { room: Room }) {
               Galleria fotografica
             </h2>
           </FadeIn>
-          <LightboxGrid images={room.gallery} />
+          <RoomGalleryCoverflow images={room.gallery} />
         </Container>
       </Section>
+
+      <RoomNav otherRooms={otherRooms} />
     </>
   );
 }

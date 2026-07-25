@@ -3,26 +3,53 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
+import { rooms } from "@/config/rooms";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useClickOutside } from "@/hooks/use-click-outside";
+
+// Everything the "Camere" dropdown surfaces besides the rooms themselves —
+// quick access to the rest of the site without leaving the menu, per
+// explicit request rather than making the visitor drill into /camere first.
+const roomsMenuExtraLinks = [
+  { label: "La Struttura", href: "/la-struttura" },
+  { label: "Galleria", href: "/galleria" },
+  { label: "Contatti", href: "/contatti" },
+];
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [roomsMenuOpen, setRoomsMenuOpen] = useState(false);
+  const roomsMenuRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
 
   const isHome = pathname === "/";
   const transparent = isHome && !scrolled && !open;
+
+  useClickOutside(roomsMenuRef, () => setRoomsMenuOpen(false), roomsMenuOpen);
+
+  // Small delay before closing on mouseleave — moving the cursor diagonally
+  // from the trigger down into the panel would otherwise clip the trigger's
+  // hover area and close it before the pointer ever reaches the panel.
+  function openRoomsMenu() {
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    setRoomsMenuOpen(true);
+  }
+  function scheduleCloseRoomsMenu() {
+    closeTimeoutRef.current = setTimeout(() => setRoomsMenuOpen(false), 150);
+  }
 
   useEffect(() => {
     function onScroll() {
@@ -83,20 +110,89 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-sm font-medium transition-colors",
-                transparent
-                  ? "text-white/90 hover:text-white"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {mainNav.map((item) =>
+            item.href === "/camere" ? (
+              <div
+                key={item.href}
+                ref={roomsMenuRef}
+                className="relative"
+                onMouseEnter={openRoomsMenu}
+                onMouseLeave={scheduleCloseRoomsMenu}
+              >
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-1 text-sm font-medium transition-colors",
+                    transparent
+                      ? "text-white/90 hover:text-white"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => setRoomsMenuOpen(false)}
+                  aria-haspopup="true"
+                  aria-expanded={roomsMenuOpen}
+                >
+                  {item.label}
+                  <ChevronDown
+                    className={cn(
+                      "size-3.5 transition-transform",
+                      roomsMenuOpen && "rotate-180",
+                    )}
+                    aria-hidden="true"
+                  />
+                </Link>
+
+                <div
+                  className={cn(
+                    "border-border bg-background absolute top-full left-1/2 z-40 mt-3 w-64 -translate-x-1/2 rounded-lg border p-2 shadow-lg transition-all duration-150",
+                    roomsMenuOpen
+                      ? "pointer-events-auto translate-y-0 opacity-100"
+                      : "pointer-events-none translate-y-1 opacity-0",
+                  )}
+                  role="menu"
+                >
+                  <p className="text-muted-foreground px-3 pt-1.5 pb-1 text-xs font-medium tracking-wide uppercase">
+                    Le Camere
+                  </p>
+                  {rooms.map((room) => (
+                    <Link
+                      key={room.slug}
+                      href={`/camere/${room.slug}`}
+                      role="menuitem"
+                      className="text-foreground hover:bg-secondary block rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                      onClick={() => setRoomsMenuOpen(false)}
+                    >
+                      {room.name}
+                    </Link>
+                  ))}
+                  <div className="border-border my-2 border-t" />
+                  {roomsMenuExtraLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      role="menuitem"
+                      className="text-muted-foreground hover:bg-secondary hover:text-foreground block rounded-md px-3 py-2 text-sm transition-colors"
+                      onClick={() => setRoomsMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "text-sm font-medium transition-colors",
+                  transparent
+                    ? "text-white/90 hover:text-white"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">

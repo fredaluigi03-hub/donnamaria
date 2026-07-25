@@ -1,3 +1,11 @@
+> **⚠️ NOT DONNA MARIA.** This handoff describes a different project
+> ("Elite Fitness Club" / `elite-motion`, built on TanStack Start) that
+> was previously worked on using this same reusable starter pack. Kept
+> here for the record, not deleted — but do not treat any decision, file
+> path, or state described below as applying to Donna Maria. See
+> `AI-Starter.Pack/handoffs/006-session-handoff.md` for the first real
+> Donna Maria handoff, and `memory/decision.md` for the rationale.
+
 # Session Handoff
 
 ## Session

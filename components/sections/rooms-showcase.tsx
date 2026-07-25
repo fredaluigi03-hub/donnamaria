@@ -43,11 +43,17 @@ export function RoomsShowcase({ bare = false }: RoomsShowcaseProps) {
           <Link href={`/camere/${room.slug}`} className="block h-full">
             <HoverScale scale={1.015} className="h-full">
               <Card className="h-full overflow-hidden">
-                <div className="relative aspect-[4/5] w-full">
+                {/* 4:3 — matches the real bed-photo source aspect (~1.35–1.45)
+                    closely, unlike the previous 4:5 portrait crop, which cut
+                    off enough of each photo that the bed sometimes wasn't
+                    even in frame. Keeps object-cover (no letterbox bars) but
+                    the crop is now minor rather than drastic. */}
+                <div className="relative aspect-[4/3] w-full">
                   <Image
                     src={room.coverImage}
                     alt={`${room.name} — ${room.tagline}`}
                     fill
+                    quality={90}
                     sizes="(min-width: 768px) 33vw, 100vw"
                     className="object-cover"
                   />

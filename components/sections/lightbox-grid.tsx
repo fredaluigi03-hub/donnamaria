@@ -68,6 +68,7 @@ export function LightboxGrid({ images, className }: LightboxGridProps) {
                     src={image.src}
                     alt={image.alt}
                     fill
+                    quality={90}
                     sizes="(min-width: 1024px) 23vw, 45vw"
                     className="object-cover"
                   />
@@ -96,6 +97,7 @@ export function LightboxGrid({ images, className }: LightboxGridProps) {
                 src={active.src}
                 alt={active.alt}
                 fill
+                quality={95}
                 sizes="90vw"
                 className="object-contain"
               />

@@ -58,6 +58,7 @@ export function GalleryPreview() {
                     src={image.src}
                     alt={image.alt}
                     fill
+                    quality={90}
                     sizes="(min-width: 1024px) 16vw, 45vw"
                     className="object-cover"
                   />

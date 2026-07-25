@@ -83,9 +83,9 @@ export const rooms: Room[] = [
     size: "26 m²",
     bedType: "Matrimoniale king-size",
     heroImage: "/images/rooms/suite/hero.png",
-    coverImage: "/images/rooms/suite/suitecopertina.png",
+    coverImage: "/images/rooms/suite/lettosuite.png",
     gallery: [
-      { src: "/images/rooms/suite/suite.png", alt: "Vista d'insieme della Suite Francy" },
+      { src: "/images/rooms/suite/hero.png", alt: "Vista d'insieme della Suite Francy" },
       { src: "/images/rooms/suite/lettosuite.png", alt: "Letto della Suite Francy" },
       {
         src: "/images/rooms/suite/saunasuite.png",
@@ -144,10 +144,10 @@ export const rooms: Room[] = [
     size: "38 m²",
     bedType: "2 letti singoli + divano letto",
     heroImage: "/images/rooms/domi/hero.png",
-    coverImage: "/images/rooms/domi/copertinadomi.png",
+    coverImage: "/images/rooms/domi/letto2domi.png",
     gallery: [
       {
-        src: "/images/rooms/domi/domi.png",
+        src: "/images/rooms/domi/hero.png",
         alt: "Vista d'insieme dell'appartamento Domi",
       },
       {
@@ -179,7 +179,6 @@ export const rooms: Room[] = [
         src: "/images/rooms/domi/quadrodomi.png",
         alt: "Dettaglio d'arredo dell'appartamento Domi",
       },
-      { src: "/images/rooms/domi/infodomi.png", alt: "Dettaglio dell'appartamento Domi" },
     ],
     amenities: [
       { icon: ChefHat, label: "Cucina attrezzata" },
@@ -213,10 +212,10 @@ export const rooms: Room[] = [
     size: "20 m²",
     bedType: "Matrimoniale",
     heroImage: "/images/rooms/mery/hero.png",
-    coverImage: "/images/rooms/mery/copertinamey.png",
+    coverImage: "/images/rooms/mery/lettomery.png",
     gallery: [
       {
-        src: "/images/rooms/mery/deluxmery.png",
+        src: "/images/rooms/mery/hero.png",
         alt: "Vista d'insieme della camera Mery",
       },
       {

@@ -1,4 +1,15 @@
-import { Car, Coffee, ShieldCheck, Wifi, Wind, type LucideIcon } from "lucide-react";
+import {
+  Car,
+  ChefHat,
+  Coffee,
+  Gift,
+  ShieldCheck,
+  Sparkles,
+  Waves,
+  Wifi,
+  Wind,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
@@ -47,6 +58,28 @@ const defaultServices: Service[] = [
     icon: ShieldCheck,
     title: "Pulizia impeccabile",
     description: "Ambienti curati nel minimo dettaglio, per un soggiorno senza pensieri.",
+  },
+  {
+    icon: Waves,
+    title: "Piscina panoramica",
+    description: "Vista sulle colline dell'Irpinia, aperta a tutti gli ospiti della struttura.",
+  },
+  {
+    icon: Sparkles,
+    title: "Sauna e vasca idromassaggio privata",
+    description:
+      "Nella Suite Francy: un angolo di benessere privato, disponibile solo per chi la prenota.",
+  },
+  {
+    icon: ChefHat,
+    title: "Cucina attrezzata",
+    description:
+      "Nell'appartamento Domi: cucina completa e divano letto, per soggiorni più lunghi o in famiglia.",
+  },
+  {
+    icon: Gift,
+    title: "Kit di cortesia e biancheria inclusa",
+    description: "Tutto già pronto all'arrivo: accappatoi, ciabattine e biancheria di qualità.",
   },
 ];
 

@@ -2,9 +2,7 @@ import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/booking/search-widget";
 import { Container } from "@/components/ui/container";
 import { OutdoorExperience } from "@/components/sections/outdoor-experience";
-import { PoolShowcase } from "@/components/sections/pool-showcase";
 import { RoomsShowcase } from "@/components/sections/rooms-showcase";
-import { WellnessShowcase } from "@/components/sections/wellness-showcase";
 import { Features } from "@/components/sections/features";
 import { GalleryPreview } from "@/components/sections/gallery-preview";
 import { Testimonials } from "@/components/sections/testimonials";
@@ -62,8 +60,6 @@ export default function HomePage() {
       </Container>
 
       <OutdoorExperience />
-      <PoolShowcase />
-      <WellnessShowcase />
       <RoomsShowcase />
       <Features />
       <GalleryPreview />

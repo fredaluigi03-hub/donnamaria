@@ -52,6 +52,9 @@ export function ScrollScrubSequence({
     if (!canvas || !ctx || !img || !img.complete || img.naturalWidth === 0) return;
     if (!width || !height) return;
 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
     // object-cover: scale the frame up to fill the box, center-cropping
     // whichever axis overflows — same visual contract as the <video>'s
     // `object-cover` it replaces.
@@ -76,18 +79,23 @@ export function ScrollScrubSequence({
     );
   };
 
-  // Keep the canvas's pixel buffer matched to its displayed size (capped at
-  // 2x DPR — sharp enough without spending 3x/4x the paint cost on the
-  // occasional 3x-DPR laptop screen).
+  // Keep the canvas's pixel buffer matched to its displayed size — at 1x,
+  // deliberately *not* multiplied by devicePixelRatio. The source frames
+  // are photographic stills capped at ~1280px wide; on a 2x/3x-DPR screen,
+  // sizing the canvas buffer to match the panel's real pixel density would
+  // just make the browser stretch that same limited source further,
+  // compounding the softness instead of adding any real sharpness — there's
+  // no extra detail in the source to resolve at a higher buffer size. 1x
+  // plus `imageSmoothingQuality: "high"` below is the sharper result for
+  // this specific case (a low-res source stretched to fill the viewport).
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.round(rect.width * dpr);
-      canvas.height = Math.round(rect.height * dpr);
+      canvas.width = Math.round(rect.width);
+      canvas.height = Math.round(rect.height);
       sizeRef.current = { width: canvas.width, height: canvas.height };
       draw(frameRef.current);
     };

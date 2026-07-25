@@ -28,7 +28,14 @@ export interface HeroCta {
 // pinned and scrubbing through `scrubFrames` before releasing into normal
 // scroll — long enough to read as "the video plays as I scroll", short
 // enough not to feel like scroll-jacking.
-const SCRUB_TRACK_VH = 140;
+//
+// The pin only "costs" the visitor (SCRUB_TRACK_VH − 100)vh of scrolling —
+// the first 100vh is spent just reaching the pinned position, sticky takes
+// over from there. Tuned for ~5–6 mouse-wheel notches (~100px each, the
+// common browser default) on a ~900px viewport: 5.5 × 100px ≈ 60vh of
+// actual travel, so 100 + 60 = 160. Adjust up/down if it feels off on your
+// actual mouse/trackpad — wheel step size isn't standardized across devices.
+const SCRUB_TRACK_VH = 160;
 
 export interface HeroProps {
   title: string;
@@ -129,8 +136,20 @@ export function Hero({
   // trickling in right as the exit flourish starts.
   const frameProgress = useTransform(scrollYProgress, [0, isPinned ? SCRUB_END : 1], [0, 1]);
   const exitStart = isPinned ? SCRUB_END : 0;
-  const scrollOpacity = useTransform(scrollYProgress, [exitStart, 1], [1, 0.45]);
-  const scrollY = useTransform(scrollYProgress, [exitStart, 1], [0, 36]);
+  // Title/subtitle/CTAs get out of the way of the scrub, not just fade at
+  // the very end of it: as soon as scrolling starts they clear off-screen
+  // (so the frame sequence reads unobstructed while it's actually
+  // scrubbing), stay clear through the middle of the scrub, then ease back
+  // in as the sequence nears its final "arrived at the jacuzzi" frame —
+  // handing off smoothly into the existing release-fade that carries the
+  // hero into the next section. Only kicks in while actually pinned/
+  // scrubbing; the non-scrub fallback (mobile, reduced motion, no
+  // scrubFrames) keeps the simple single fade it had before.
+  const textInputRange = isPinned ? [0, 0.12, 0.65, SCRUB_END, 1] : [exitStart, 1];
+  const textOpacityRange = isPinned ? [1, 0, 0, 1, 0.45] : [1, 0.45];
+  const textYRange = isPinned ? [0, -18, -18, 0, 36] : [0, 36];
+  const scrollOpacity = useTransform(scrollYProgress, textInputRange, textOpacityRange);
+  const scrollY = useTransform(scrollYProgress, textInputRange, textYRange);
   // Subtle "parallax on exit" for the background itself (video or image) —
   // transform-only (scale/opacity), never top/left, so it stays GPU-cheap.
   // No zoom (1, not 1.08/1.02) — the frame sequence is already at its
@@ -144,207 +163,218 @@ export function Hero({
     <section
       ref={sectionRef}
       className={cn(
-        "relative -mt-20 flex flex-col overflow-hidden",
-        isFullscreen
-          ? "min-h-dvh justify-center"
-          : "min-h-[65vh] justify-end md:min-h-[75vh]",
-        // Pins to the viewport while the outer track (below) supplies the
-        // extra scroll distance to scrub through — see `isPinned` above.
-        isFullscreen && "sticky top-0",
+        "relative -mt-20 overflow-hidden",
+        isFullscreen ? "min-h-dvh bg-background sticky top-0" : "min-h-[65vh] md:min-h-[75vh]",
       )}
     >
-      {/* Background layer — the "parallax on exit" wrapper (scale/opacity
-          only, transform-based) is separate from the Ken Burns wrapper
-          inside it, so the two motions compose instead of fighting. */}
-      <motion.div
-        className="absolute inset-0"
-        style={
-          isFullscreen && !shouldReduceMotion
-            ? { scale: backgroundScale, opacity: backgroundOpacity }
-            : undefined
-        }
+      {/* Media frame. On the fullscreen hero this is deliberately inset from
+          the section's edges — a visible margin/gutter (the section's
+          `bg-background` showing through) around the footage rather than
+          true full-bleed, per design direction. Top stays flush (`top-0`)
+          so the transparent header still overlaps the image exactly as
+          before; only the sides and bottom get the border. The compact
+          room-header variant is untouched — full-bleed, `inset-0`. */}
+      <div
+        className={cn(
+          "absolute flex flex-col overflow-hidden",
+          isFullscreen
+            ? "inset-x-3 top-0 bottom-3 justify-center rounded-b-2xl sm:inset-x-4 sm:bottom-4 sm:rounded-b-3xl md:inset-x-6 md:bottom-6 md:rounded-b-[2rem]"
+            : "inset-0 justify-end",
+        )}
       >
-        {/* Static image — always present as base/fallback. Gets a slow Ken
-            Burns zoom only when the video is skipped (mobile, or no
-            videoSrc) and motion is allowed; otherwise fully static, since
-            the video itself supplies the motion. */}
+        {/* Background layer — the "parallax on exit" wrapper (scale/opacity
+            only, transform-based) is separate from the Ken Burns wrapper
+            inside it, so the two motions compose instead of fighting. */}
         <motion.div
           className="absolute inset-0"
-          initial={showKenBurns ? { scale: 1 } : undefined}
-          animate={showKenBurns ? { scale: 1.05 } : undefined}
-          transition={
-            showKenBurns ? { duration: 22, ease: MOTION.easeEmphatic } : undefined
+          style={
+            isFullscreen && !shouldReduceMotion
+              ? { scale: backgroundScale, opacity: backgroundOpacity }
+              : undefined
           }
         >
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            priority
-            quality={92}
-            sizes="100vw"
-            className="object-cover"
-          />
+          {/* Static image — always present as base/fallback. Gets a slow Ken
+              Burns zoom only when the video is skipped (mobile, or no
+              videoSrc) and motion is allowed; otherwise fully static, since
+              the video itself supplies the motion. */}
+          <motion.div
+            className="absolute inset-0"
+            initial={showKenBurns ? { scale: 1 } : undefined}
+            animate={showKenBurns ? { scale: 1.05 } : undefined}
+            transition={
+              showKenBurns ? { duration: 22, ease: MOTION.easeEmphatic } : undefined
+            }
+          >
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              priority
+              quality={92}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </motion.div>
+
+          {/* Gated on `mounted` (not just `useReducedMotion()`/`isMobile`) —
+              those resolve after hydration, so mounting/unmounting the
+              video/scrub tree based on them directly would make the server
+              and the client's first paint disagree on the DOM tree.
+              `useMounted()` is false on both, so this only appears in a
+              safe, post-hydration render. */}
+          {showScrub && scrubFrames && (
+            <ScrollScrubSequence
+              basePath={scrubFrames.basePath}
+              frameCount={scrubFrames.count}
+              extension={scrubFrames.extension}
+              progress={frameProgress}
+            />
+          )}
+          {showVideo && videoSrc && <BackgroundVideo src={videoSrc} poster={imageSrc} />}
         </motion.div>
 
-        {/* Gated on `mounted` (not just `useReducedMotion()`/`isMobile`) —
-            those resolve after hydration, so mounting/unmounting the
-            video/scrub tree based on them directly would make the server
-            and the client's first paint disagree on the DOM tree.
-            `useMounted()` is false on both, so this only appears in a
-            safe, post-hydration render. */}
-        {showScrub && scrubFrames && (
-          <ScrollScrubSequence
-            basePath={scrubFrames.basePath}
-            frameCount={scrubFrames.count}
-            extension={scrubFrames.extension}
-            progress={frameProgress}
-          />
+        {/* Overlay — a flat, subtle wash (~12%, well within the 10–15% luxury
+            range) so the footage's own color stays dominant, plus a soft
+            radial boost centered behind the text for contrast. Never a heavy
+            uniform dark wash — the golden-hour/jacuzzi tones must read through. */}
+        {isFullscreen ? (
+          <>
+            <div className="absolute inset-0 bg-black/[0.12]" />
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "radial-gradient(ellipse 60% 55% at center, rgba(10,8,6,0.36) 0%, rgba(10,8,6,0.08) 60%, rgba(10,8,6,0) 100%)",
+              }}
+            />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
         )}
-        {showVideo && videoSrc && <BackgroundVideo src={videoSrc} poster={imageSrc} />}
-      </motion.div>
 
-      {/* Overlay — a flat, subtle wash (~12%, well within the 10–15% luxury
-          range) so the footage's own color stays dominant, plus a soft
-          radial boost centered behind the text for contrast. Never a heavy
-          uniform dark wash — the golden-hour/jacuzzi tones must read through. */}
-      {isFullscreen ? (
-        <>
-          <div className="absolute inset-0 bg-black/[0.12]" />
-          <div
-            className="absolute inset-0"
+        {isFullscreen ? (
+          <motion.div
             style={{
-              background:
-                "radial-gradient(ellipse 60% 55% at center, rgba(10,8,6,0.36) 0%, rgba(10,8,6,0.08) 60%, rgba(10,8,6,0) 100%)",
+              opacity: shouldReduceMotion ? 1 : scrollOpacity,
+              y: shouldReduceMotion ? 0 : scrollY,
             }}
-          />
-        </>
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
-      )}
+            className="relative z-10"
+          >
+            <Container className="flex flex-col items-center gap-6 py-28 text-center md:py-32">
+              {kicker && (
+                <FadeIn distance={10} delay={0.6} duration={1}>
+                  <span className="flex items-center justify-center gap-3 text-xs font-medium tracking-[0.35em] text-white/85 uppercase">
+                    <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
+                    {kicker}
+                    <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
+                  </span>
+                </FadeIn>
+              )}
 
-      {isFullscreen ? (
-        <motion.div
-          style={{
-            opacity: shouldReduceMotion ? 1 : scrollOpacity,
-            y: shouldReduceMotion ? 0 : scrollY,
-          }}
-          className="relative z-10"
-        >
-          <Container className="flex flex-col items-center gap-6 py-28 text-center md:py-32">
+              <h1 className="font-display max-w-3xl text-4xl leading-[1.05] font-medium tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                <TextReveal text={title} delay={0.8} />
+              </h1>
+
+              {subtitle && (
+                <FadeIn delay={1.2} duration={1} className="max-w-xl">
+                  <p className="text-lg font-light text-white/85 md:text-xl">{subtitle}</p>
+                </FadeIn>
+              )}
+
+              {(primaryCta ?? secondaryCta) && (
+                <FadeIn
+                  delay={1.6}
+                  duration={1}
+                  className="mt-2 flex flex-wrap items-center justify-center gap-8"
+                >
+                  {primaryCta && (
+                    <Button
+                      size="lg"
+                      asChild
+                      className="h-auto bg-white px-8 py-3.5 text-sm font-medium text-neutral-900 shadow-none hover:bg-white/90"
+                    >
+                      <Link href={primaryCta.href}>
+                        {primaryCta.label}
+                        <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  )}
+                  {/* A single quiet wayfinding link, not a second competing
+                      button — one confident action per hero, per the luxury
+                      reference brands (see docs/02_CREATIVE_DIRECTION.md's
+                      "Restraint"). */}
+                  {secondaryCta && (
+                    <Link
+                      href={secondaryCta.href}
+                      className="group inline-flex items-center gap-2 text-sm font-medium text-white/90 transition-colors hover:text-white"
+                    >
+                      <span className="underline-offset-4 group-hover:underline">
+                        {secondaryCta.label}
+                      </span>
+                      <ArrowRight
+                        className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                        aria-hidden="true"
+                      />
+                    </Link>
+                  )}
+                </FadeIn>
+              )}
+            </Container>
+          </motion.div>
+        ) : (
+          <Container className="relative z-10 flex flex-col items-start gap-6 pt-40 pb-20 md:pb-28">
             {kicker && (
-              <FadeIn distance={10} delay={0.6} duration={1}>
-                <span className="flex items-center justify-center gap-3 text-xs font-medium tracking-[0.35em] text-white/85 uppercase">
-                  <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
+              <FadeIn distance={12}>
+                <Badge
+                  variant="secondary"
+                  className="border-white/25 bg-white/10 text-white backdrop-blur-sm"
+                >
                   {kicker}
-                  <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
-                </span>
+                </Badge>
               </FadeIn>
             )}
 
-            <h1 className="font-display max-w-3xl text-4xl leading-[1.05] font-medium tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              <TextReveal text={title} delay={0.8} />
+            <h1 className="font-display max-w-3xl text-4xl leading-[1.05] font-medium tracking-tight text-white md:text-6xl lg:text-7xl">
+              <TextReveal text={title} />
             </h1>
 
             {subtitle && (
-              <FadeIn delay={1.2} duration={1} className="max-w-xl">
-                <p className="text-lg font-light text-white/85 md:text-xl">{subtitle}</p>
+              <FadeIn delay={0.15} className="max-w-xl">
+                <p className="text-lg text-white/85 md:text-xl">{subtitle}</p>
               </FadeIn>
             )}
 
             {(primaryCta ?? secondaryCta) && (
-              <FadeIn
-                delay={1.6}
-                duration={1}
-                className="mt-2 flex flex-wrap items-center justify-center gap-8"
-              >
+              <FadeIn delay={0.25} className="flex flex-wrap gap-3">
                 {primaryCta && (
-                  <Button
-                    size="lg"
-                    asChild
-                    className="h-auto bg-white px-8 py-3.5 text-sm font-medium text-neutral-900 shadow-none hover:bg-white/90"
-                  >
+                  <Button size="lg" asChild>
                     <Link href={primaryCta.href}>
                       {primaryCta.label}
                       <ArrowRight aria-hidden="true" />
                     </Link>
                   </Button>
                 )}
-                {/* A single quiet wayfinding link, not a second competing
-                    button — one confident action per hero, per the luxury
-                    reference brands (see docs/02_CREATIVE_DIRECTION.md's
-                    "Restraint"). */}
                 {secondaryCta && (
-                  <Link
-                    href={secondaryCta.href}
-                    className="group inline-flex items-center gap-2 text-sm font-medium text-white/90 transition-colors hover:text-white"
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    asChild
+                    className="border-white/40 bg-white/5 text-white hover:bg-white/15 hover:text-white"
                   >
-                    <span className="underline-offset-4 group-hover:underline">
-                      {secondaryCta.label}
-                    </span>
-                    <ArrowRight
-                      className="size-4 transition-transform duration-300 group-hover:translate-x-1"
-                      aria-hidden="true"
-                    />
-                  </Link>
+                    <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
+                  </Button>
                 )}
               </FadeIn>
             )}
           </Container>
-        </motion.div>
-      ) : (
-        <Container className="relative z-10 flex flex-col items-start gap-6 pt-40 pb-20 md:pb-28">
-          {kicker && (
-            <FadeIn distance={12}>
-              <Badge
-                variant="secondary"
-                className="border-white/25 bg-white/10 text-white backdrop-blur-sm"
-              >
-                {kicker}
-              </Badge>
-            </FadeIn>
-          )}
+        )}
 
-          <h1 className="font-display max-w-3xl text-4xl leading-[1.05] font-medium tracking-tight text-white md:text-6xl lg:text-7xl">
-            <TextReveal text={title} />
-          </h1>
-
-          {subtitle && (
-            <FadeIn delay={0.15} className="max-w-xl">
-              <p className="text-lg text-white/85 md:text-xl">{subtitle}</p>
-            </FadeIn>
-          )}
-
-          {(primaryCta ?? secondaryCta) && (
-            <FadeIn delay={0.25} className="flex flex-wrap gap-3">
-              {primaryCta && (
-                <Button size="lg" asChild>
-                  <Link href={primaryCta.href}>
-                    {primaryCta.label}
-                    <ArrowRight aria-hidden="true" />
-                  </Link>
-                </Button>
-              )}
-              {secondaryCta && (
-                <Button
-                  size="lg"
-                  variant="outline"
-                  asChild
-                  className="border-white/40 bg-white/5 text-white hover:bg-white/15 hover:text-white"
-                >
-                  <Link href={secondaryCta.href}>{secondaryCta.label}</Link>
-                </Button>
-              )}
-            </FadeIn>
-          )}
-        </Container>
-      )}
-
-      {isFullscreen && (
-        <FadeIn distance={0} delay={2} duration={1}>
-          <ScrollCue reduceMotion={shouldReduceMotion ?? false} />
-        </FadeIn>
-      )}
+        {isFullscreen && (
+          <FadeIn distance={0} delay={2} duration={1}>
+            <ScrollCue reduceMotion={shouldReduceMotion ?? false} />
+          </FadeIn>
+        )}
+      </div>
     </section>
   );
 
