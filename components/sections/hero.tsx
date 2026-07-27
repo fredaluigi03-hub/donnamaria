@@ -37,7 +37,15 @@ export interface HeroCta {
 // unhurried, so the footage reads as a camera move the visitor is driving
 // rather than a flipbook. Raise it to slow the scrub further, lower it to
 // speed up; the hold and the copy timing below follow automatically.
-const SCRUB_TRACK_VH = 285;
+export const SCRUB_TRACK_VH = 285;
+
+/**
+ * Viewport heights of scrolling the pinned hero costs before it releases —
+ * i.e. how long the footage owns the screen. Exported so the Header can dim
+ * its nav for exactly that stretch without duplicating the number; see
+ * components/layout/header.tsx.
+ */
+export const HERO_IMMERSIVE_VH = SCRUB_TRACK_VH - 100;
 
 export interface HeroProps {
   title: string;
@@ -164,11 +172,17 @@ export function Hero({
   // still-running scrub — which is exactly what an earlier `SCRUB_END * 0.8`
   // stop did: the text faded in over the last fifth of the footage.
   const TEXT_IN = SCRUB_END + (PINNED_END - SCRUB_END) * 0.25;
+  // Starts at 0, not 1: while the footage plays, the screen carries only the
+  // logo and the scroll cue. The headline, subtitle and CTAs arrive as the
+  // reward once the sequence lands on the pool. The non-pinned fallback
+  // (mobile, reduced motion, no scrub) still shows them immediately — there
+  // is no footage there to earn them, and hiding a hero's copy behind a
+  // scroll that never scrubs would just be a blank page.
   const textInputRange = isPinned
     ? [0, 0.1, SCRUB_END, TEXT_IN, PINNED_END, 1]
     : [exitStart, 1];
-  const textOpacityRange = isPinned ? [1, 0, 0, 1, 1, 0.45] : [1, 0.45];
-  const textYRange = isPinned ? [0, -18, -18, 0, 0, 36] : [0, 36];
+  const textOpacityRange = isPinned ? [0, 0, 0, 1, 1, 0.45] : [1, 0.45];
+  const textYRange = isPinned ? [12, 12, 12, 0, 0, 36] : [0, 36];
   const scrollOpacity = useTransform(scrollYProgress, textInputRange, textOpacityRange);
   const scrollY = useTransform(scrollYProgress, textInputRange, textYRange);
   // Subtle "parallax on exit" for the background itself (video or image) —
@@ -446,13 +460,17 @@ function ScrollCue({ reduceMotion }: { reduceMotion: boolean }) {
         window.scrollTo({ top: window.innerHeight - 80, behavior: "smooth" });
       }}
       aria-label="Scorri per scoprire di più"
-      className="group absolute inset-x-0 bottom-8 z-10 hidden flex-col items-center gap-2.5 md:flex"
+      className="group absolute inset-x-0 bottom-10 z-10 hidden flex-col items-center gap-3.5 md:flex"
     >
-      <span className="text-[0.65rem] font-medium tracking-[0.3em] text-white/70 uppercase transition-colors group-hover:text-white">
+      {/* Larger and brighter than a usual scroll hint on purpose: while the
+          footage is running this and the logo are the only things on screen,
+          so it carries the entire "this page responds to scrolling" message.
+          A visitor who doesn't scroll never sees the headline or the CTA. */}
+      <span className="text-sm font-medium tracking-[0.3em] text-white/85 uppercase transition-colors [text-shadow:0_1px_12px_rgba(10,8,6,0.5)] group-hover:text-white">
         Scorri
       </span>
       <span
-        className="relative block h-10 w-px overflow-hidden bg-white/25"
+        className="relative block h-16 w-px overflow-hidden bg-white/30"
         aria-hidden="true"
       >
         <motion.span

@@ -9,12 +9,15 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { HERO_IMMERSIVE_VH } from "@/components/sections/hero";
 import { mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { rooms } from "@/config/rooms";
 import { cn } from "@/lib/utils";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useMounted } from "@/hooks/use-mounted";
 
 // Everything the "Camere" dropdown surfaces besides the rooms themselves —
 // quick access to the rest of the site without leaving the menu, per
@@ -28,14 +31,26 @@ const roomsMenuExtraLinks = [
 export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [pastHeroFootage, setPastHeroFootage] = useState(false);
   const [roomsMenuOpen, setRoomsMenuOpen] = useState(false);
   const roomsMenuRef = useRef<HTMLDivElement>(null);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const mounted = useMounted();
 
   const isHome = pathname === "/";
   const transparent = isHome && !scrolled && !open;
+
+  // While the homepage hero is playing its scroll-scrubbed footage, the header
+  // shows the wordmark and nothing else — the nav and the booking button fade
+  // out so the film owns the screen, then come back once the sequence lands.
+  // Mirrors the Hero's own conditions: the scrub only exists on a mounted,
+  // non-mobile, motion-allowing client, and `mounted` also keeps the server
+  // render and the first paint identical (both "not immersive").
+  const heroFootagePlaying =
+    isHome && mounted && !shouldReduceMotion && !isMobile && !open && !pastHeroFootage;
 
   useClickOutside(roomsMenuRef, () => setRoomsMenuOpen(false), roomsMenuOpen);
 
@@ -53,6 +68,12 @@ export function Header() {
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 80);
+      // HERO_IMMERSIVE_VH is how far the pinned hero travels before releasing,
+      // imported rather than hardcoded so retiming the scrub can't leave the
+      // nav hidden past the end of the footage (or reappearing over it).
+      setPastHeroFootage(
+        window.scrollY >= (HERO_IMMERSIVE_VH / 100) * window.innerHeight,
+      );
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -108,7 +129,16 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        {/* `invisible` alongside the fade, not opacity alone: a 0-opacity nav
+            is still clickable and still reachable by keyboard, so links would
+            be sitting invisibly over the footage. */}
+        <nav
+          className={cn(
+            "hidden items-center gap-8 transition-opacity duration-500 ease-(--ease-standard) md:flex",
+            heroFootagePlaying ? "invisible opacity-0" : "visible opacity-100",
+          )}
+          aria-hidden={heroFootagePlaying}
+        >
           {mainNav.map((item) =>
             item.href === "/camere" ? (
               <div
@@ -194,7 +224,13 @@ export function Header() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div
+          className={cn(
+            "hidden items-center gap-2 transition-opacity duration-500 ease-(--ease-standard) md:flex",
+            heroFootagePlaying ? "invisible opacity-0" : "visible opacity-100",
+          )}
+          aria-hidden={heroFootagePlaying}
+        >
           <Button asChild variant={transparent ? "secondary" : "default"}>
             <Link href="/contatti#richiedi-disponibilita">Prenota Ora</Link>
           </Button>
