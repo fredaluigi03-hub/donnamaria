@@ -3,6 +3,7 @@ import { MapPin, MessageCircle, Phone } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Kicker } from "@/components/ui/kicker";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/animations/fade-in";
 import { Reveal } from "@/components/animations/reveal";
@@ -22,9 +23,7 @@ export function LocationContact() {
             <Kicker>Posizione</Kicker>
           </FadeIn>
           <FadeIn delay={0.05}>
-            <h2 className="font-display max-w-lg text-3xl leading-[1.05] font-medium tracking-tight md:text-4xl">
-              Nel cuore verde dell&apos;Irpinia.
-            </h2>
+            <SectionTitle>Nel cuore verde dell&apos;Irpinia.</SectionTitle>
           </FadeIn>
           <FadeIn delay={0.1} className="max-w-md">
             <p className="text-muted-foreground text-lg font-light text-pretty">
@@ -72,7 +71,9 @@ export function LocationContact() {
         </div>
 
         <Reveal>
-          <div className="border-border aspect-[4/3] w-full overflow-hidden rounded-lg border">
+          {/* Same grounding shadow as the cards and the room photos, so the map
+              panel sits on the page rather than looking like a hole cut in it. */}
+          <div className="border-border aspect-[4/3] w-full overflow-hidden rounded-xl border shadow-[0_1px_2px_rgba(24,20,16,0.05),0_18px_44px_-20px_rgba(24,20,16,0.26)]">
             <iframe
               src={`https://www.google.com/maps?q=${mapQuery}&output=embed`}
               title={`Mappa: ${siteConfig.name}`}

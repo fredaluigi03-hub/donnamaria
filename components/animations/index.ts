@@ -8,5 +8,6 @@ export { PageTransition } from "./page-transition";
 export { TextReveal } from "./text-reveal";
 export { BackgroundVideo } from "./background-video";
 export { HoverScale } from "./hover-scale";
+export { Tilt3D } from "./tilt-3d";
 export { LoadingScreen } from "./loading-screen";
 export { SmoothScroll } from "./smooth-scroll";

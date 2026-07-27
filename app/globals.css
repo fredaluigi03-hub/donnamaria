@@ -205,14 +205,43 @@
 
   html {
     scroll-behavior: auto; /* Lenis owns smooth scrolling; see SmoothScroll */
+    /* Ground color lives here, not on <body>: AmbientBackdrop is a
+       `fixed -z-10` layer inside body, and an opaque body background would
+       paint straight over it. With body transparent, the backdrop sits above
+       this fill and below all content, which is exactly where texture goes. */
+    @apply bg-background;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply text-foreground font-sans antialiased;
   }
 
   ::selection {
     @apply bg-primary text-primary-foreground;
+  }
+}
+
+/* Ambient light drift for components/ui/ambient-backdrop.tsx — very slow,
+   transform-only (translate/scale), so the warm ivory ground is never a dead
+   flat fill. Two blooms on different periods and directions never resolve into
+   a visible loop. The reduced-motion backstop below neutralizes both. */
+@keyframes ambient-drift-a {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) scale(1.12);
+  }
+}
+
+@keyframes ambient-drift-b {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-5%, 5%, 0) scale(1);
   }
 }
 

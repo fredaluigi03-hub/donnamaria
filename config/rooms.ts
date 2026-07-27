@@ -82,11 +82,14 @@ export const rooms: Room[] = [
     guests: "2 ospiti",
     size: "26 m²",
     bedType: "Matrimoniale king-size",
-    heroImage: "/images/rooms/suite/hero.png",
-    coverImage: "/images/rooms/suite/lettosuite.png",
+    heroImage: "/images/rooms/suite/lettosuiteorizzontale.jpg",
+    coverImage: "/images/rooms/suite/lettosuite.jpg",
     gallery: [
-      { src: "/images/rooms/suite/hero.png", alt: "Vista d'insieme della Suite Francy" },
-      { src: "/images/rooms/suite/lettosuite.png", alt: "Letto della Suite Francy" },
+      {
+        src: "/images/rooms/suite/lettosuiteorizzontale.jpg",
+        alt: "Vista d'insieme della Suite Francy",
+      },
+      { src: "/images/rooms/suite/lettosuite.jpg", alt: "Letto della Suite Francy" },
       {
         src: "/images/rooms/suite/saunasuite.png",
         alt: "Sauna privata della Suite Francy",
@@ -143,11 +146,15 @@ export const rooms: Room[] = [
     guests: "Fino a 4 ospiti",
     size: "38 m²",
     bedType: "2 letti singoli + divano letto",
-    heroImage: "/images/rooms/domi/hero.png",
-    coverImage: "/images/rooms/domi/letto2domi.png",
+    heroImage: "/images/rooms/domi/lettodomiorizzontale.jpg",
+    // `hero.jpg` (4:5 portrait, for the homepage band) is a different file from
+    // the legacy `hero.png` and from `lettodomiorizzontale.jpg` (16:9, the page
+    // header above) — three similar names, three different crops. Don't
+    // collapse them.
+    coverImage: "/images/rooms/domi/hero.jpg",
     gallery: [
       {
-        src: "/images/rooms/domi/hero.png",
+        src: "/images/rooms/domi/lettodomiorizzontale.jpg",
         alt: "Vista d'insieme dell'appartamento Domi",
       },
       {
@@ -211,15 +218,15 @@ export const rooms: Room[] = [
     guests: "2 ospiti",
     size: "20 m²",
     bedType: "Matrimoniale",
-    heroImage: "/images/rooms/mery/hero.png",
-    coverImage: "/images/rooms/mery/lettomery.png",
+    heroImage: "/images/rooms/mery/lettomeryorizzontale.jpg",
+    coverImage: "/images/rooms/mery/lettomery.jpg",
     gallery: [
       {
-        src: "/images/rooms/mery/hero.png",
+        src: "/images/rooms/mery/lettomeryorizzontale.jpg",
         alt: "Vista d'insieme della camera Mery",
       },
       {
-        src: "/images/rooms/mery/lettomery.png",
+        src: "/images/rooms/mery/lettomery.jpg",
         alt: "Letto matrimoniale della camera Mery",
       },
       {

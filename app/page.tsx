@@ -1,7 +1,6 @@
 import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/booking/search-widget";
 import { Container } from "@/components/ui/container";
-import { OutdoorExperience } from "@/components/sections/outdoor-experience";
 import { RoomsShowcase } from "@/components/sections/rooms-showcase";
 import { Features } from "@/components/sections/features";
 import { GalleryPreview } from "@/components/sections/gallery-preview";
@@ -47,21 +46,23 @@ export default function HomePage() {
         kicker="Serino, Irpinia"
         title="Il tuo rifugio di charme tra le colline d'Irpinia"
         subtitle="Suite eleganti, piscina panoramica, jacuzzi e sauna: un'ospitalità autentica a Serino, nel cuore verde della Campania."
-        imageSrc="/images/hero-fallback.webp"
-        imageAlt="Jacuzzi panoramica al tramonto di Donna Maria Suite & Relax"
-        scrubFrames={{ basePath: "/images/hero-frames/frame", count: 60 }}
+        imageSrc="/images/hero-jacuzzi-poster.webp"
+        imageAlt="Jacuzzi e lettino con vista sul tramonto delle colline d'Irpinia, Donna Maria Suite & Relax"
+        scrubFrames={{
+          basePath: "/images/hero-jacuzzi/frame",
+          count: 71,
+          extension: "webp",
+        }}
         primaryCta={{ label: "Prenota Ora", href: "/contatti#richiedi-disponibilita" }}
         secondaryCta={{ label: "Scopri le Camere", href: "/camere" }}
       />
 
-      {/* Overlaps the hero's bottom padding — the "Booking-style" search bar. */}
-      <Container className="relative z-10 -mt-10 mb-16 md:-mt-14">
+      <Container className="py-10 md:py-14">
         <SearchWidget />
       </Container>
 
-      <OutdoorExperience />
       <RoomsShowcase />
-      <Features />
+      <Features className="bg-secondary/30" />
       <GalleryPreview />
       <Testimonials />
       <LocationContact />

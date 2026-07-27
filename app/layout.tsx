@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/layout/theme-provider";
 import { SmoothScroll } from "@/components/animations/smooth-scroll";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 
 import "lenis/dist/lenis.css";
 import "./globals.css";
@@ -14,12 +15,11 @@ import "./globals.css";
 export const metadata: Metadata = buildMetadata();
 
 export const viewport: Viewport = {
-  // Matches --background in app/globals.css (light/dark) so the mobile
-  // browser chrome never mismatches the page underneath it.
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#faf8f5" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1714" },
-  ],
+  // Single value, not a light/dark pair: the site is forced to the light
+  // theme (see components/layout/theme-provider.tsx), so matching
+  // --background here means the mobile browser chrome never mismatches the
+  // page underneath it — including for visitors whose OS is set to dark.
+  themeColor: "#faf8f5",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it" suppressHydrationWarning>
       <body className={cn(fontSans.variable, fontDisplay.variable, "font-sans")}>
         <ThemeProvider>
+          <AmbientBackdrop />
           <SmoothScroll>
             <div className="flex min-h-dvh flex-col">
               <Header />

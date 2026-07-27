@@ -26,7 +26,12 @@ export function Cta() {
   }
 
   return (
-    <Section className="py-12 md:py-16">
+    // Deliberately pulled UP with a negative margin, not just given small
+    // padding: the section above already ends with ~176px of its own bottom
+    // padding, so reducing this one's top padding alone still left a screenful
+    // of dead air. The negative margin eats into that gap so "Torna su" reads
+    // as attached to the content it closes.
+    <Section className="-mt-16 pt-0 pb-8 md:-mt-24 md:pb-10">
       <Container className="flex justify-center">
         <FadeIn>
           <button

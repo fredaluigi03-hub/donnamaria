@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Kicker } from "@/components/ui/kicker";
+import { SectionTitle } from "@/components/ui/section-title";
 import { FadeIn } from "@/components/animations/fade-in";
 import { SlideIn } from "@/components/animations/slide-in";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
@@ -44,10 +45,10 @@ export function AboutIntro() {
             <Kicker>Chi siamo</Kicker>
           </FadeIn>
           <FadeIn delay={0.05}>
-            <h2 className="font-display max-w-lg text-3xl leading-[1.05] font-medium tracking-tight md:text-4xl">
+            <SectionTitle>
               Un&apos;accoglienza che sa di casa, con l&apos;eleganza di un rifugio di
               charme.
-            </h2>
+            </SectionTitle>
           </FadeIn>
           <FadeIn delay={0.1} className="max-w-lg">
             <p className="text-muted-foreground text-lg font-light text-pretty">

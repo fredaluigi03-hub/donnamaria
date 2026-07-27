@@ -31,11 +31,13 @@ export interface HeroCta {
 //
 // The pin only "costs" the visitor (SCRUB_TRACK_VH − 100)vh of scrolling —
 // the first 100vh is spent just reaching the pinned position, sticky takes
-// over from there. Tuned for ~5–6 mouse-wheel notches (~100px each, the
-// common browser default) on a ~900px viewport: 5.5 × 100px ≈ 60vh of
-// actual travel, so 100 + 60 = 160. Adjust up/down if it feels off on your
-// actual mouse/trackpad — wheel step size isn't standardized across devices.
-const SCRUB_TRACK_VH = 160;
+// over from there. 285 gives ~185vh of actual travel, split by SCRUB_END
+// below into the scrub itself plus a deliberate hold on the final pool
+// frame. Sized so the scrub spends ~17px of scroll per frame — deliberately
+// unhurried, so the footage reads as a camera move the visitor is driving
+// rather than a flipbook. Raise it to slow the scrub further, lower it to
+// speed up; the hold and the copy timing below follow automatically.
+const SCRUB_TRACK_VH = 285;
 
 export interface HeroProps {
   title: string;
@@ -122,10 +124,19 @@ export function Hero({
   // top of each other. Scroll up and the same track plays it back in
   // reverse before handing control back to normal scrolling.
   const isPinned = showScrub;
-  // Fraction of the pinned track spent scrubbing frames; the remainder is
-  // a brief release flourish (fade/zoom) right before the pin lets go and
-  // normal scrolling carries the visitor into the next section.
-  const SCRUB_END = 0.85;
+  // `scrollYProgress` only reaches 1 once the track's *bottom* hits the
+  // viewport top, but the sticky hero unpins a full viewport earlier than
+  // that — so the pin is already gone by this fraction of the progress
+  // range. Everything below must stay under it: anything scheduled past
+  // PINNED_END happens while the hero is scrolling away, not while it's held.
+  const PINNED_END = (SCRUB_TRACK_VH - 100) / SCRUB_TRACK_VH;
+  // Scrub through the frames over the first ~71% of the pinned stretch. The
+  // rest is a deliberate hold: the last frame (the wide, calm pool) sits
+  // still, fully visible, with the headline and CTA back on top of it — the
+  // arrival is meant to be lingered on, not scrolled straight past into the
+  // next section. Expressed as a fraction of PINNED_END so lengthening the
+  // track slows the scrub without eating into the hold.
+  const SCRUB_END = PINNED_END * 0.715;
 
   const { scrollYProgress } = useScroll({
     target: isPinned ? pinRef : sectionRef,
@@ -134,7 +145,11 @@ export function Hero({
   // Drives the frame sequence — finishes scrubbing at `SCRUB_END` so the
   // last stretch of the pin is a clean held frame, not a scrub still
   // trickling in right as the exit flourish starts.
-  const frameProgress = useTransform(scrollYProgress, [0, isPinned ? SCRUB_END : 1], [0, 1]);
+  const frameProgress = useTransform(
+    scrollYProgress,
+    [0, isPinned ? SCRUB_END : 1],
+    [0, 1],
+  );
   const exitStart = isPinned ? SCRUB_END : 0;
   // Title/subtitle/CTAs get out of the way of the scrub, not just fade at
   // the very end of it: as soon as scrolling starts they clear off-screen
@@ -145,9 +160,15 @@ export function Hero({
   // hero into the next section. Only kicks in while actually pinned/
   // scrubbing; the non-scrub fallback (mobile, reduced motion, no
   // scrubFrames) keeps the simple single fade it had before.
-  const textInputRange = isPinned ? [0, 0.12, 0.65, SCRUB_END, 1] : [exitStart, 1];
-  const textOpacityRange = isPinned ? [1, 0, 0, 1, 0.45] : [1, 0.45];
-  const textYRange = isPinned ? [0, -18, -18, 0, 36] : [0, 36];
+  // Keyed off SCRUB_END/PINNED_END rather than hardcoded stops, so the copy
+  // clears during the scrub, lands back exactly as the pool frame arrives,
+  // holds there for the whole still stretch, and only lets go once the pin
+  // is actually releasing.
+  const textInputRange = isPinned
+    ? [0, 0.12, SCRUB_END * 0.8, SCRUB_END, PINNED_END, 1]
+    : [exitStart, 1];
+  const textOpacityRange = isPinned ? [1, 0, 0, 1, 1, 0.45] : [1, 0.45];
+  const textYRange = isPinned ? [0, -18, -18, 0, 0, 36] : [0, 36];
   const scrollOpacity = useTransform(scrollYProgress, textInputRange, textOpacityRange);
   const scrollY = useTransform(scrollYProgress, textInputRange, textYRange);
   // Subtle "parallax on exit" for the background itself (video or image) —
@@ -157,29 +178,34 @@ export function Hero({
   // visibly softens it right as it hands off to the next section. Just
   // the opacity fade carries the exit now.
   const backgroundScale = useTransform(scrollYProgress, [exitStart, 1], [1, 1]);
-  const backgroundOpacity = useTransform(scrollYProgress, [exitStart, 1], [1, 0.85]);
+  // Stays fully opaque through the hold — the pool is the payoff, so it must
+  // not sit there quietly dimming while the visitor looks at it. The softening
+  // only happens in the final stretch, as the pin actually releases.
+  const backgroundOpacity = useTransform(
+    scrollYProgress,
+    isPinned ? [exitStart, PINNED_END, 1] : [exitStart, 1],
+    isPinned ? [1, 1, 0.85] : [1, 0.85],
+  );
 
   const heroSection = (
     <section
       ref={sectionRef}
       className={cn(
         "relative -mt-20 overflow-hidden",
-        isFullscreen ? "min-h-dvh bg-background sticky top-0" : "min-h-[65vh] md:min-h-[75vh]",
+        isFullscreen
+          ? "bg-background sticky top-0 min-h-dvh"
+          : "min-h-[65vh] md:min-h-[75vh]",
       )}
     >
-      {/* Media frame. On the fullscreen hero this is deliberately inset from
-          the section's edges — a visible margin/gutter (the section's
-          `bg-background` showing through) around the footage rather than
-          true full-bleed, per design direction. Top stays flush (`top-0`)
-          so the transparent header still overlaps the image exactly as
-          before; only the sides and bottom get the border. The compact
-          room-header variant is untouched — full-bleed, `inset-0`. */}
+      {/* Media frame — true full-bleed (`inset-0`, no radius) in both variants.
+          The fullscreen hero used to sit inside a visible margin with rounded
+          bottom corners; it now runs edge to edge so the footage fills the
+          whole viewport and the scroll-scrubbed sequence reads as cinema
+          rather than as a large card on a page. */}
       <div
         className={cn(
-          "absolute flex flex-col overflow-hidden",
-          isFullscreen
-            ? "inset-x-3 top-0 bottom-3 justify-center rounded-b-2xl sm:inset-x-4 sm:bottom-4 sm:rounded-b-3xl md:inset-x-6 md:bottom-6 md:rounded-b-[2rem]"
-            : "inset-0 justify-end",
+          "absolute inset-0 flex flex-col overflow-hidden",
+          isFullscreen ? "justify-center" : "justify-end",
         )}
       >
         {/* Background layer — the "parallax on exit" wrapper (scale/opacity
@@ -271,13 +297,26 @@ export function Hero({
                 </FadeIn>
               )}
 
-              <h1 className="font-display max-w-3xl text-4xl leading-[1.05] font-medium tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+              {/* The soft shadow here is doing two jobs, not one: it lifts the
+                  type off the footage the way light and shade do on the section
+                  headings, and it guarantees legibility over a *moving*
+                  background whose brightness changes frame to frame as the
+                  scrub runs from the lamp-lit deck into bright pool water. Wide
+                  and soft (24px, 45%), never a hard offset — a crisp drop
+                  shadow over video reads as a caption, not as a title. */}
+              <h1 className="font-display max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-white [text-shadow:0_2px_24px_rgba(10,8,6,0.45)] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
                 <TextReveal text={title} delay={0.8} />
               </h1>
 
               {subtitle && (
                 <FadeIn delay={1.2} duration={1} className="max-w-xl">
-                  <p className="text-lg font-light text-white/85 md:text-xl">{subtitle}</p>
+                  {/* Display italic, not the sans body font — a quiet
+                      editorial-magazine touch (a distinct type voice for
+                      the subtitle line) that a generic template's single
+                      sans-for-everything system doesn't have. */}
+                  <p className="font-display text-lg font-light text-white/85 italic [text-shadow:0_1px_16px_rgba(10,8,6,0.4)] md:text-xl">
+                    {subtitle}
+                  </p>
                 </FadeIn>
               )}
 
@@ -340,7 +379,9 @@ export function Hero({
 
             {subtitle && (
               <FadeIn delay={0.15} className="max-w-xl">
-                <p className="text-lg text-white/85 md:text-xl">{subtitle}</p>
+                <p className="font-display text-lg text-white/85 italic md:text-xl">
+                  {subtitle}
+                </p>
               </FadeIn>
             )}
 

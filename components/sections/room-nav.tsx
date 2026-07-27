@@ -37,9 +37,13 @@ export function RoomNav({ otherRooms }: RoomNavProps) {
   }
 
   return (
-    <Section className="py-12 md:py-16">
-      <Container className="flex flex-col items-center gap-6">
-        <FadeIn className="flex flex-wrap items-center justify-center gap-3">
+    // Pulled UP with a negative margin, not merely given less padding: the
+    // section above contributes ~176px of bottom padding of its own, so
+    // trimming this one's top padding alone still left a screenful of dead air
+    // between the gallery and this closing row.
+    <Section className="-mt-16 pt-0 pb-8 md:-mt-24 md:pb-10">
+      <Container className="flex flex-col items-center gap-4">
+        <FadeIn className="flex flex-wrap items-center justify-center gap-2">
           <Button asChild variant="outline">
             <Link href="/">
               <Home aria-hidden="true" />
@@ -52,11 +56,11 @@ export function RoomNav({ otherRooms }: RoomNavProps) {
           </Button>
         </FadeIn>
 
-        <FadeIn delay={0.05} className="flex flex-col items-center gap-3">
-          <p className="text-muted-foreground text-sm font-medium tracking-wide uppercase">
+        <FadeIn delay={0.05} className="flex flex-col items-center gap-2">
+          <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
             Scopri le altre camere
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             {otherRooms.map((other) => (
               <Button key={other.slug} asChild variant="ghost">
                 <Link href={`/camere/${other.slug}`}>

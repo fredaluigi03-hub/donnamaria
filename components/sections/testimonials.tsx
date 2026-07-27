@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Badge } from "@/components/ui/badge";
 import { Kicker } from "@/components/ui/kicker";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
@@ -53,9 +54,7 @@ export function Testimonials() {
             <Kicker>Recensioni</Kicker>
           </FadeIn>
           <FadeIn delay={0.05}>
-            <h2 className="font-display max-w-lg text-3xl leading-[1.05] font-medium tracking-tight md:text-4xl">
-              Le parole di chi è stato nostro ospite.
-            </h2>
+            <SectionTitle>Le parole di chi è stato nostro ospite.</SectionTitle>
           </FadeIn>
         </div>
 
@@ -66,7 +65,12 @@ export function Testimonials() {
                 <CardContent className="flex h-full flex-col gap-4 pt-6 pb-6">
                   <div className="flex items-center justify-between">
                     <Quote className="text-gold size-6" aria-hidden="true" />
-                    <Badge variant="secondary">{review.score}</Badge>
+                    {/* Score in the brand champagne, not neutral grey — a 10/10
+                        is the most persuasive pixel on this card and deserves
+                        the accent colour. */}
+                    <Badge className="bg-gold/15 text-gold border-transparent font-semibold">
+                      {review.score}
+                    </Badge>
                   </div>
                   <p className="text-foreground grow text-sm text-pretty">
                     &ldquo;{review.quote}&rdquo;

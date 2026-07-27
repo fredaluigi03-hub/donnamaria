@@ -10,8 +10,12 @@ import { rooms } from "@/config/rooms";
 export function Footer() {
   const year = new Date().getFullYear();
 
+  // The footer carries an inset shadow along its top edge rather than only a
+  // hairline border, so the page appears to slide *under* it — closing the
+  // document with the same light-and-shade language the sections use instead of
+  // a flat rule. Inset, so it never overlaps the content above.
   return (
-    <footer className="border-border/60 bg-secondary/40 border-t">
+    <footer className="border-border/60 bg-secondary/40 border-t shadow-[inset_0_14px_28px_-18px_rgba(24,20,16,0.22)]">
       <Container className="py-16 md:py-20">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">

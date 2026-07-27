@@ -123,7 +123,11 @@ export function OutdoorExperience() {
             </h2>
 
             <FadeIn delay={0.1} amount={0.6} className="max-w-lg">
-              <p className="text-lg font-light text-white/85 md:text-xl">
+              {/* Matches Hero's subtitle treatment — italic display serif,
+                  not the sans body font — so the same quiet editorial
+                  voice carries through every "big photo + white text"
+                  moment on the site, not just the very first one. */}
+              <p className="font-display text-lg font-light text-white/85 italic md:text-xl">
                 Piscina panoramica, sauna e spazi dedicati al benessere per vivere un
                 soggiorno di assoluto relax tra le colline d&apos;Irpinia.
               </p>
@@ -144,18 +148,25 @@ export function OutdoorExperience() {
                   <ArrowRight aria-hidden="true" />
                 </a>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                asChild
-                className="h-auto border-white/70 bg-transparent px-8 py-3.5 text-sm font-medium text-white shadow-none hover:bg-white/10 hover:text-white"
+              {/* A single quiet wayfinding link, not a second competing
+                  button — same "one confident action" treatment as the
+                  Hero's secondary CTA. Wellness no longer has its own
+                  homepage section (see Decision log, 2026-07-25) — its
+                  jacuzzi/sauna live in the Suite Francy room, so this
+                  links straight there instead of to a removed `#wellness`
+                  anchor. */}
+              <Link
+                href="/camere/suite-francy"
+                className="group inline-flex items-center gap-2 text-sm font-medium text-white/90 transition-colors hover:text-white"
               >
-                {/* Wellness no longer has its own homepage section (see
-                    Decision log, 2026-07-25) — its jacuzzi/sauna live in the
-                    Suite Francy room, so this now links straight there
-                    instead of to a removed `#wellness` anchor. */}
-                <Link href="/camere/suite-francy">Area Benessere</Link>
-              </Button>
+                <span className="underline-offset-4 group-hover:underline">
+                  Area Benessere
+                </span>
+                <ArrowRight
+                  className="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
             </FadeIn>
           </div>
         </Container>

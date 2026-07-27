@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarRange, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GuestPicker, type GuestCounts } from "@/components/booking/guest-picker";
@@ -13,13 +12,15 @@ export interface SearchWidgetProps {
 }
 
 /**
- * The homepage "Booking-style" availability bar: check-in/check-out +
- * guests, single reusable component (also usable on /camere if that page
- * wants the same bar). Submitting takes the guest to the booking request
- * form (/contatti#richiedi-disponibilita) with the selection pre-filled
- * as query params — this kit has no live payment/availability engine (see
+ * The homepage availability strip: check-in/check-out + guests, single
+ * reusable component (also usable on /camere if that page wants the same
+ * bar). Submitting takes the guest to the booking request form
+ * (/contatti#richiedi-disponibilita) with the selection pre-filled as
+ * query params — this kit has no live payment/availability engine (see
  * components/forms/booking-form.tsx), so "Verifica disponibilità" opens a
- * request, it doesn't confirm a real-time hold.
+ * request, it doesn't confirm a real-time hold. Styled as a plain
+ * hairline-bordered strip rather than a floating card, deliberately
+ * avoiding the OTA "search engine" look (icons, shadow, rounded card).
  */
 export function SearchWidget({ className }: SearchWidgetProps) {
   const router = useRouter();
@@ -41,13 +42,16 @@ export function SearchWidget({ className }: SearchWidgetProps) {
     <form
       onSubmit={handleSubmit}
       className={cn(
-        "bg-card text-card-foreground border-border flex w-full flex-col gap-3 rounded-xl border p-3 shadow-xl sm:flex-row sm:items-center sm:gap-2",
+        "border-border flex w-full flex-col gap-3 border-y py-5 xl:flex-row xl:items-center xl:gap-2 xl:py-0",
         className,
       )}
     >
-      <label className="flex h-14 flex-1 flex-col justify-center gap-0.5 rounded-lg px-3.5 sm:h-16">
-        <span className="text-muted-foreground flex items-center gap-1.5 text-[0.65rem] font-medium tracking-[0.1em] uppercase">
-          <CalendarRange className="size-3.5" aria-hidden="true" />
+      <span className="text-muted-foreground hidden pr-6 text-[0.65rem] font-medium tracking-[0.2em] uppercase xl:block">
+        Disponibilità
+      </span>
+
+      <label className="flex h-14 flex-1 flex-col justify-center gap-0.5 px-3.5 xl:h-16">
+        <span className="text-muted-foreground text-[0.65rem] font-medium tracking-[0.1em] uppercase">
           Check-in
         </span>
         <input
@@ -58,11 +62,10 @@ export function SearchWidget({ className }: SearchWidgetProps) {
         />
       </label>
 
-      <div className="bg-border hidden h-10 w-px sm:block" aria-hidden="true" />
+      <div className="bg-border hidden h-10 w-px xl:block" aria-hidden="true" />
 
-      <label className="flex h-14 flex-1 flex-col justify-center gap-0.5 rounded-lg px-3.5 sm:h-16">
-        <span className="text-muted-foreground flex items-center gap-1.5 text-[0.65rem] font-medium tracking-[0.1em] uppercase">
-          <CalendarRange className="size-3.5" aria-hidden="true" />
+      <label className="flex h-14 flex-1 flex-col justify-center gap-0.5 px-3.5 xl:h-16">
+        <span className="text-muted-foreground text-[0.65rem] font-medium tracking-[0.1em] uppercase">
           Check-out
         </span>
         <input
@@ -74,17 +77,16 @@ export function SearchWidget({ className }: SearchWidgetProps) {
         />
       </label>
 
-      <div className="bg-border hidden h-10 w-px sm:block" aria-hidden="true" />
+      <div className="bg-border hidden h-10 w-px xl:block" aria-hidden="true" />
 
       <GuestPicker
         value={guests}
         onChange={setGuests}
         variant="pill"
-        className="h-14 flex-1 sm:h-16"
+        className="h-14 flex-1 px-3.5 xl:h-16"
       />
 
-      <Button type="submit" size="lg" className="h-14 gap-2 sm:h-16 sm:px-8">
-        <Search className="size-4" aria-hidden="true" />
+      <Button type="submit" variant="outline" size="lg" className="xl:ml-4 xl:px-8">
         Verifica disponibilità
       </Button>
     </form>

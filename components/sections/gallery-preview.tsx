@@ -1,14 +1,13 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Kicker } from "@/components/ui/kicker";
+import { SectionTitle } from "@/components/ui/section-title";
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "@/components/animations/fade-in";
-import { Stagger, StaggerItem } from "@/components/animations/stagger";
-import { HoverScale } from "@/components/animations/hover-scale";
+import { RoomGalleryCoverflow } from "@/components/sections/room-gallery-coverflow";
 import { galleryImages } from "@/config/gallery";
 
 const preview = [
@@ -31,9 +30,7 @@ export function GalleryPreview() {
               <Kicker>Galleria</Kicker>
             </FadeIn>
             <FadeIn delay={0.05}>
-              <h2 className="font-display max-w-lg text-3xl leading-[1.05] font-medium tracking-tight md:text-4xl">
-                Ogni dettaglio racconta la nostra cura.
-              </h2>
+              <SectionTitle>Ogni dettaglio racconta la nostra cura.</SectionTitle>
             </FadeIn>
           </div>
           <FadeIn delay={0.1}>
@@ -46,27 +43,12 @@ export function GalleryPreview() {
           </FadeIn>
         </div>
 
-        <Stagger
-          className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6"
-          staggerChildren={0.05}
-        >
-          {preview.map((image) => (
-            <StaggerItem key={image.src}>
-              <HoverScale scale={1.04}>
-                <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    quality={90}
-                    sizes="(min-width: 1024px) 16vw, 45vw"
-                    className="object-cover"
-                  />
-                </div>
-              </HoverScale>
-            </StaggerItem>
-          ))}
-        </Stagger>
+        {/* Was a row of six flat square thumbnails — six small pictures nobody
+            looks at. The same six photos in the 3D coverflow give one large
+            image to actually look at, something to click, and real depth from
+            the rotated neighbours. Same component as the room detail pages, so
+            the gallery pattern reads as one language across the site. */}
+        <RoomGalleryCoverflow images={preview} />
       </Container>
     </Section>
   );

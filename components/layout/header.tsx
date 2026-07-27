@@ -9,7 +9,6 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { rooms } from "@/config/rooms";
@@ -196,7 +195,6 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          <ThemeToggle transparent={transparent} />
           <Button asChild variant={transparent ? "secondary" : "default"}>
             <Link href="/contatti#richiedi-disponibilita">Prenota Ora</Link>
           </Button>
@@ -236,9 +234,8 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
-            <div className="flex items-center justify-between pt-2">
-              <ThemeToggle />
-              <Button asChild>
+            <div className="pt-2">
+              <Button asChild className="w-full">
                 <Link
                   href="/contatti#richiedi-disponibilita"
                   onClick={() => setOpen(false)}

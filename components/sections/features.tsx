@@ -14,15 +14,9 @@ import {
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Kicker } from "@/components/ui/kicker";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { SectionTitle } from "@/components/ui/section-title";
+import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
-import { HoverScale } from "@/components/animations/hover-scale";
 import { FadeIn } from "@/components/animations/fade-in";
 
 export interface Service {
@@ -62,7 +56,8 @@ const defaultServices: Service[] = [
   {
     icon: Waves,
     title: "Piscina panoramica",
-    description: "Vista sulle colline dell'Irpinia, aperta a tutti gli ospiti della struttura.",
+    description:
+      "Vista sulle colline dell'Irpinia, aperta a tutti gli ospiti della struttura.",
   },
   {
     icon: Sparkles,
@@ -79,7 +74,8 @@ const defaultServices: Service[] = [
   {
     icon: Gift,
     title: "Kit di cortesia e biancheria inclusa",
-    description: "Tutto già pronto all'arrivo: accappatoi, ciabattine e biancheria di qualità.",
+    description:
+      "Tutto già pronto all'arrivo: accappatoi, ciabattine e biancheria di qualità.",
   },
 ];
 
@@ -109,26 +105,43 @@ export function Features({
             <Kicker>{badgeLabel}</Kicker>
           </FadeIn>
           <FadeIn delay={0.05}>
-            <h2 className="font-display max-w-lg text-3xl leading-[1.05] font-medium tracking-tight md:text-4xl">
-              {title}
-            </h2>
+            <SectionTitle>{title}</SectionTitle>
           </FadeIn>
         </div>
 
+        {/* No `HoverScale` wrapper around these cards: `Card` now owns the
+            hover lift itself (see components/ui/card.tsx), and stacking a scale
+            on top of it gave two competing transforms on the same gesture. */}
         <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
-            <StaggerItem key={service.title}>
-              <HoverScale scale={1.02}>
-                <Card className="h-full">
-                  <CardHeader>
-                    <service.icon className="text-gold mb-2 size-6" aria-hidden="true" />
-                    <CardTitle>{service.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription>{service.description}</CardDescription>
-                  </CardContent>
-                </Card>
-              </HoverScale>
+            <StaggerItem key={service.title} className="group relative h-full">
+              {/* Champagne light bleeding from behind the card — the same
+                  treatment as the booking rail on the room pages, in gold
+                  instead of the per-room accent. Faint at rest so nine of them
+                  never turn the section into a light show, and it comes up on
+                  hover so the card the visitor is reading is the one that
+                  glows. */}
+              <div
+                aria-hidden="true"
+                className="bg-gold pointer-events-none absolute -inset-2 -z-10 rounded-3xl opacity-0 blur-2xl transition-opacity duration-(--duration-base) group-hover:opacity-25"
+              />
+              <Card className="h-full gap-0 overflow-hidden p-0">
+                {/* Gold hairline across the top, mirroring the accent bar on the
+                    room Dotazioni panel — the detail that ties the two lists
+                    together as the same kind of object. */}
+                <div
+                  aria-hidden="true"
+                  className="from-gold/70 via-gold to-gold/70 h-0.5 w-full bg-gradient-to-r"
+                />
+                <div className="flex flex-col gap-3 p-6">
+                  <service.icon
+                    className="text-gold size-6 drop-shadow-[0_2px_8px_rgba(184,149,106,0.45)]"
+                    aria-hidden="true"
+                  />
+                  <CardTitle>{service.title}</CardTitle>
+                  <CardDescription>{service.description}</CardDescription>
+                </div>
+              </Card>
             </StaggerItem>
           ))}
         </Stagger>
