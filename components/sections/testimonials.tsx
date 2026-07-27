@@ -7,6 +7,7 @@ import { Kicker } from "@/components/ui/kicker";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Glow } from "@/components/ui/glow";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
 import { FadeIn } from "@/components/animations/fade-in";
 import { siteConfig } from "@/config/site";
@@ -60,7 +61,11 @@ export function Testimonials() {
 
         <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-3" staggerChildren={0.1}>
           {reviews.map((review) => (
-            <StaggerItem key={review.author}>
+            <StaggerItem key={review.author} className="relative h-full">
+              {/* Same champagne bleed as the amenities cards and the room
+                  booking rail — a quote panel is the other place on the page
+                  that has to feel worth reading. */}
+              <Glow subtle />
               <Card className="h-full">
                 <CardContent className="flex h-full flex-col gap-4 pt-6 pb-6">
                   <div className="flex items-center justify-between">

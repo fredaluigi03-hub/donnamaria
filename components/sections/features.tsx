@@ -16,6 +16,7 @@ import { Section } from "@/components/ui/section";
 import { Kicker } from "@/components/ui/kicker";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Card, CardTitle, CardDescription } from "@/components/ui/card";
+import { Glow } from "@/components/ui/glow";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
 import { FadeIn } from "@/components/animations/fade-in";
 
@@ -114,17 +115,12 @@ export function Features({
             on top of it gave two competing transforms on the same gesture. */}
         <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
-            <StaggerItem key={service.title} className="group relative h-full">
-              {/* Champagne light bleeding from behind the card — the same
-                  treatment as the booking rail on the room pages, in gold
-                  instead of the per-room accent. Faint at rest so nine of them
-                  never turn the section into a light show, and it comes up on
-                  hover so the card the visitor is reading is the one that
-                  glows. */}
-              <div
-                aria-hidden="true"
-                className="bg-gold pointer-events-none absolute -inset-2 -z-10 rounded-3xl opacity-0 blur-2xl transition-opacity duration-(--duration-base) group-hover:opacity-25"
-              />
+            <StaggerItem key={service.title} className="relative h-full">
+              {/* Same two-layer champagne bleed as the booking rail on the room
+                  pages, always on rather than hover-only. `subtle` because nine
+                  panels at the rail's full strength wash the whole section —
+                  see components/ui/glow.tsx. */}
+              <Glow subtle />
               <Card className="h-full gap-0 overflow-hidden p-0">
                 {/* Gold hairline across the top, mirroring the accent bar on the
                     room Dotazioni panel — the detail that ties the two lists

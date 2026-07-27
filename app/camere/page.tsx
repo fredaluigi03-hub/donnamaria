@@ -21,8 +21,8 @@ export default function CamerePage() {
         kicker="Le Camere"
         title="Tre atmosfere, una sola cura per il dettaglio"
         subtitle="Ogni camera racconta un'esperienza diversa — scegli quella più adatta al vostro soggiorno."
-        imageSrc="/images/rooms/suite/hero.png"
-        imageAlt="Suite Francy di Donna Maria Suite & Relax"
+        imageSrc="/images/rooms/suite/lettosuiteorizzontale.jpg"
+        imageAlt="Letto a baldacchino della Suite Francy nella luce calda della sera"
       />
 
       <Section>

@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Glow } from "@/components/ui/glow";
 import { Kicker } from "@/components/ui/kicker";
 import { SectionTitle } from "@/components/ui/section-title";
 import { Hero } from "@/components/sections/hero";
@@ -149,21 +150,7 @@ export function RoomDetail({ room }: { room: Room }) {
                   rail — same light-bleed language as the photos, so the one
                   panel that asks for the booking sits in a pool of the room's
                   identity (gold / blue / rose) instead of on bare ground. */}
-              <div
-                aria-hidden="true"
-                className={cn(
-                  "absolute -inset-6 -z-10 rounded-[2rem] opacity-45 blur-3xl",
-                  accentBarClass[room.accent],
-                )}
-              />
-              {/* A second, tighter champagne halo over the accent one: the
-                  colour glow alone reads as a coloured smudge, while a warm
-                  light hugging the panel's edge is what actually makes it look
-                  lit. Two layers at different radii = glow with a source. */}
-              <div
-                aria-hidden="true"
-                className="bg-gold absolute -inset-2 -z-10 rounded-3xl opacity-30 blur-xl"
-              />
+              <Glow accentClass={accentBarClass[room.accent]} />
               <Card className="gap-0 overflow-hidden p-0">
                 <div
                   aria-hidden="true"

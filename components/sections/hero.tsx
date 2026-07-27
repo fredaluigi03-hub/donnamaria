@@ -151,21 +151,21 @@ export function Hero({
     [0, 1],
   );
   const exitStart = isPinned ? SCRUB_END : 0;
-  // Title/subtitle/CTAs get out of the way of the scrub, not just fade at
-  // the very end of it: as soon as scrolling starts they clear off-screen
-  // (so the frame sequence reads unobstructed while it's actually
-  // scrubbing), stay clear through the middle of the scrub, then ease back
-  // in as the sequence nears its final "arrived at the jacuzzi" frame —
-  // handing off smoothly into the existing release-fade that carries the
-  // hero into the next section. Only kicks in while actually pinned/
-  // scrubbing; the non-scrub fallback (mobile, reduced motion, no
-  // scrubFrames) keeps the simple single fade it had before.
-  // Keyed off SCRUB_END/PINNED_END rather than hardcoded stops, so the copy
-  // clears during the scrub, lands back exactly as the pool frame arrives,
-  // holds there for the whole still stretch, and only lets go once the pin
-  // is actually releasing.
+  // Copy timing, and the whole point of it: the footage plays completely
+  // unobstructed. The title/subtitle/CTAs are visible on arrival (they're the
+  // landing state), clear out as soon as scrolling starts, and stay at zero
+  // for the *entire* scrub — nothing sits over the video while it's moving.
+  // They only come back once the scrub has finished and the final pool frame
+  // is being held still, appearing over the first quarter of that hold, then
+  // staying put until the pin actually releases.
+  //
+  // Every stop is derived from SCRUB_END/PINNED_END rather than hardcoded, so
+  // retiming the track can't accidentally slide the copy back on top of a
+  // still-running scrub — which is exactly what an earlier `SCRUB_END * 0.8`
+  // stop did: the text faded in over the last fifth of the footage.
+  const TEXT_IN = SCRUB_END + (PINNED_END - SCRUB_END) * 0.25;
   const textInputRange = isPinned
-    ? [0, 0.12, SCRUB_END * 0.8, SCRUB_END, PINNED_END, 1]
+    ? [0, 0.1, SCRUB_END, TEXT_IN, PINNED_END, 1]
     : [exitStart, 1];
   const textOpacityRange = isPinned ? [1, 0, 0, 1, 1, 0.45] : [1, 0.45];
   const textYRange = isPinned ? [0, -18, -18, 0, 0, 36] : [0, 36];
