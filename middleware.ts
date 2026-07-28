@@ -1,16 +1,13 @@
-import { type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  return updateSession(request);
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next()
+  response.headers.delete('x-frame-options')
+  response.headers.set('Content-Security-Policy', 'frame-ancestors *;')
+  return response
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for static assets and image
-     * optimization files, to avoid unnecessary session refresh work.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-};
+  matcher: '/:path*',
+}
