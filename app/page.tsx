@@ -47,10 +47,15 @@ export default function HomePage() {
         title="Il tuo rifugio di charme tra le colline d'Irpinia"
         subtitle="Suite eleganti, piscina panoramica, jacuzzi e sauna: un'ospitalità autentica a Serino, nel cuore verde della Campania."
         imageSrc="/images/hero-jacuzzi-poster.webp"
-        imageAlt="Jacuzzi e lettino con vista sul tramonto delle colline d'Irpinia, Donna Maria Suite & Relax"
+        imageAlt="Piscina panoramica al tramonto tra le colline d'Irpinia, Donna Maria Suite & Relax"
+        // 69 frames at 1920x1080, re-extracted from the 4K source at 8fps and
+        // cut at 8.6s — the burned-in "B&B DONNA MARIA RELAX / BOOK YOUR STAY"
+        // end card starts fading in right after that. The corner watermark is
+        // painted out with ffmpeg's `delogo` rather than cropped away, which is
+        // what the previous pass had to do at the cost of 11% of the frame.
         scrubFrames={{
           basePath: "/images/hero-jacuzzi/frame",
-          count: 71,
+          count: 69,
           extension: "webp",
         }}
         primaryCta={{ label: "Prenota Ora", href: "/contatti#richiedi-disponibilita" }}
