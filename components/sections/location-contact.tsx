@@ -117,12 +117,12 @@ export function LocationContact() {
                 className="h-full w-full contrast-[1.05] saturate-[1.15] filter"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-              <div className="absolute right-5 bottom-5 left-5 flex items-center justify-between rounded-2xl border border-white/20 bg-black/75 p-3.5 text-xs text-white shadow-xl backdrop-blur-md">
+              <div className="absolute right-3 bottom-3 left-3 flex flex-col items-start justify-between gap-1 rounded-2xl border border-white/20 bg-black/80 p-3 text-xs text-white shadow-xl backdrop-blur-md sm:right-5 sm:bottom-5 sm:left-5 sm:flex-row sm:items-center sm:p-3.5">
                 <span className="flex items-center gap-2 font-medium">
-                  <Sparkles className="text-gold size-4" />
+                  <Sparkles className="text-gold size-3.5 shrink-0" />
                   Donna Maria Suite &amp; Relax · Serino (AV)
                 </span>
-                <span className="text-gold text-[0.7rem] font-semibold tracking-widest uppercase">
+                <span className="text-gold text-[0.65rem] font-semibold tracking-widest uppercase sm:text-[0.7rem]">
                   Vista Satellitare 3D
                 </span>
               </div>

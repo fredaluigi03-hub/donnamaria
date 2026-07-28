@@ -139,12 +139,12 @@ export function OutdoorExperience() {
             <FadeIn
               delay={0.2}
               amount={0.6}
-              className="mt-2 flex flex-wrap items-center gap-4"
+              className="mt-3 flex w-full flex-col items-stretch gap-3.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4"
             >
               <Button
                 size="lg"
                 asChild
-                className="h-auto bg-white px-8 py-3.5 text-sm font-medium text-neutral-900 shadow-none hover:bg-white/90"
+                className="h-12 w-full bg-white px-7 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-md hover:bg-white/90 sm:h-auto sm:w-auto"
               >
                 <a href="#suites" onClick={scrollToSection("suites")}>
                   Scopri le Suite

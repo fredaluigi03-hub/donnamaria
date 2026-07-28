@@ -306,24 +306,24 @@ export function Hero({
             }}
             className="relative z-10"
           >
-            <Container className="flex flex-col items-center gap-6 py-28 text-center md:py-32">
+            <Container className="flex flex-col items-center gap-5 py-24 text-center sm:gap-6 sm:py-28 md:py-32">
               {kicker && (
                 <FadeIn distance={10} delay={0.6} duration={1}>
-                  <span className="text-gold flex items-center justify-center gap-3 text-xs font-semibold tracking-[0.35em] uppercase drop-shadow-[0_2px_10px_rgba(184,149,106,0.6)]">
-                    <span className="bg-gold h-px w-10" aria-hidden="true" />
+                  <span className="text-gold flex items-center justify-center gap-2.5 text-[0.65rem] font-semibold tracking-[0.35em] uppercase drop-shadow-[0_2px_10px_rgba(184,149,106,0.6)] sm:gap-3 sm:text-xs">
+                    <span className="bg-gold h-px w-6 sm:w-10" aria-hidden="true" />
                     {kicker}
-                    <span className="bg-gold h-px w-10" aria-hidden="true" />
+                    <span className="bg-gold h-px w-6 sm:w-10" aria-hidden="true" />
                   </span>
                 </FadeIn>
               )}
 
-              <h1 className="font-display max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-white [text-shadow:0_2px_24px_rgba(10,8,6,0.5)] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
+              <h1 className="font-display max-w-4xl text-3xl leading-[1.05] font-medium tracking-tight text-white [text-shadow:0_2px_24px_rgba(10,8,6,0.5)] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
                 <TextReveal text={title} delay={0.8} />
               </h1>
 
               {subtitle && (
                 <FadeIn delay={1.2} duration={1} className="max-w-xl">
-                  <p className="font-display text-lg font-light text-amber-50/90 italic [text-shadow:0_1px_16px_rgba(10,8,6,0.4)] md:text-xl">
+                  <p className="font-display text-base font-light text-amber-50/90 italic [text-shadow:0_1px_16px_rgba(10,8,6,0.4)] sm:text-lg md:text-xl">
                     {subtitle}
                   </p>
                 </FadeIn>
@@ -333,13 +333,13 @@ export function Hero({
                 <FadeIn
                   delay={1.6}
                   duration={1}
-                  className="mt-4 flex flex-wrap items-center justify-center gap-6"
+                  className="mt-3 flex w-full flex-col items-center justify-center gap-3 sm:mt-4 sm:w-auto sm:flex-row sm:gap-6"
                 >
                   {primaryCta && (
                     <Button
                       size="lg"
                       asChild
-                      className="border-gold/40 hover:shadow-gold/30 h-auto border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-8 py-3.5 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105"
+                      className="border-gold/40 hover:shadow-gold/30 h-12 w-full border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-7 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105 sm:h-auto sm:w-auto"
                     >
                       <Link href={primaryCta.href}>
                         {primaryCta.label}
@@ -350,9 +350,9 @@ export function Hero({
                   {secondaryCta && (
                     <Link
                       href={secondaryCta.href}
-                      className="group border-gold/40 hover:border-gold rounded-full border bg-black/30 px-6 py-3 text-xs font-semibold tracking-widest text-amber-100 uppercase backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:text-white"
+                      className="group border-gold/40 hover:border-gold w-full rounded-full border bg-black/40 px-6 py-3 text-center text-xs font-semibold tracking-widest text-amber-100 uppercase backdrop-blur-md transition-all duration-300 hover:bg-black/60 hover:text-white sm:w-auto"
                     >
-                      <span className="inline-flex items-center gap-2">
+                      <span className="inline-flex items-center justify-center gap-2">
                         {secondaryCta.label}
                         <ArrowRight
                           className="text-gold size-4 transition-transform duration-300 group-hover:translate-x-1"

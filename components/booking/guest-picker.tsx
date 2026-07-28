@@ -84,7 +84,7 @@ export function GuestPicker({
         <div
           role="dialog"
           aria-label="Seleziona il numero di ospiti"
-          className="border-gold/40 bg-card/95 text-foreground animate-in fade-in-50 zoom-in-95 absolute top-full left-0 z-50 mt-3 w-72 rounded-2xl border p-5 shadow-2xl backdrop-blur-xl duration-200"
+          className="border-gold/40 bg-card/95 text-foreground animate-in fade-in-50 zoom-in-95 absolute top-full left-1/2 z-50 mt-3 w-[calc(100vw-2.5rem)] max-w-xs -translate-x-1/2 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl duration-200 sm:p-5 xl:left-0 xl:translate-x-0"
         >
           <div className="border-border/60 mb-3 flex items-center gap-2 border-b pb-2">
             <Users className="text-gold size-4" />

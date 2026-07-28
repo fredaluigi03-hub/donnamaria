@@ -149,7 +149,7 @@ function CustomDatePickerPopover({
       </button>
 
       {open && (
-        <div className="border-gold/40 bg-card/98 text-foreground animate-in fade-in-50 zoom-in-95 absolute top-full left-0 z-50 mt-3 w-80 rounded-2xl border p-5 shadow-2xl backdrop-blur-2xl duration-200">
+        <div className="border-gold/40 bg-card/98 text-foreground animate-in fade-in-50 zoom-in-95 absolute top-full left-1/2 z-50 mt-3 w-[calc(100vw-2.5rem)] max-w-xs -translate-x-1/2 rounded-2xl border p-4 shadow-2xl backdrop-blur-2xl duration-200 sm:p-5 xl:left-0 xl:translate-x-0">
           <div className="border-border/60 mb-4 flex items-center justify-between border-b pb-2">
             <button
               type="button"
