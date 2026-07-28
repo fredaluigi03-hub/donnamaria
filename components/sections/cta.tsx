@@ -1,19 +1,14 @@
 "use client";
 
-import { ArrowUp } from "lucide-react";
+import Link from "next/link";
+import { ArrowUp, Home, Hotel, Sparkles } from "lucide-react";
 import { useLenis } from "lenis/react";
 
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
 import { FadeIn } from "@/components/animations/fade-in";
+import { Tilt3D } from "@/components/animations/tilt-3d";
 
-/**
- * Closing element before the Footer — deliberately minimal (just a "torna
- * su" prompt), not a second big booking pitch. The primary booking CTA
- * already appears in the Hero and the sticky header on every page; a large
- * dark "Prenota il tuo soggiorno" box repeating that same ask right before
- * the footer read as redundant and was replaced with this on request.
- */
 export function Cta() {
   const lenis = useLenis();
 
@@ -26,25 +21,35 @@ export function Cta() {
   }
 
   return (
-    // Deliberately pulled UP with a negative margin, not just given small
-    // padding: the section above already ends with ~176px of its own bottom
-    // padding, so reducing this one's top padding alone still left a screenful
-    // of dead air. The negative margin eats into that gap so "Torna su" reads
-    // as attached to the content it closes.
-    <Section className="-mt-16 pt-0 pb-8 md:-mt-24 md:pb-10">
-      <Container className="flex justify-center">
-        <FadeIn>
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className="group text-muted-foreground hover:text-foreground inline-flex items-center gap-2 text-sm font-medium tracking-wide transition-colors"
-          >
-            <ArrowUp
-              className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5"
-              aria-hidden="true"
-            />
-            Torna su
-          </button>
+    <Section className="relative -mt-6 py-6 md:-mt-8 md:py-8">
+      <Container className="flex flex-col items-center justify-center gap-4 text-center">
+        {/* 3D Interactive Navigation Dock */}
+        <FadeIn delay={0.05}>
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+            <Tilt3D>
+              <button
+                type="button"
+                onClick={scrollToTop}
+                className="group border-gold/40 bg-card/90 hover:border-gold hover:bg-gold/10 text-foreground hover:shadow-gold/20 inline-flex items-center gap-2.5 rounded-full border px-6 py-3 text-xs font-semibold tracking-widest uppercase shadow-xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+              >
+                <ArrowUp
+                  className="text-gold size-4 transition-transform duration-300 group-hover:-translate-y-1"
+                  aria-hidden="true"
+                />
+                Torna su
+              </button>
+            </Tilt3D>
+
+            <Tilt3D>
+              <Link
+                href="/camere"
+                className="group border-gold/40 bg-card/90 hover:border-gold hover:bg-gold/10 text-foreground hover:shadow-gold/20 inline-flex items-center gap-2.5 rounded-full border px-6 py-3 text-xs font-semibold tracking-widest uppercase shadow-xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+              >
+                <Hotel className="text-gold size-4" aria-hidden="true" />
+                Vai nelle Camere
+              </Link>
+            </Tilt3D>
+          </div>
         </FadeIn>
       </Container>
     </Section>

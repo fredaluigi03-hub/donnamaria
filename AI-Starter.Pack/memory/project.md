@@ -19,7 +19,7 @@ Expected Delivery: not specified by the client.
 ## Stack
 
 Framework: Next.js 16 (App Router), React 19, TypeScript (strict) — this
-project *does* use the stack the rest of the starter pack assumes, unlike
+project _does_ use the stack the rest of the starter pack assumes, unlike
 some other projects built from this same pack. Treat `docs/`, `config/`,
 `lib/`, `hooks/` at the project root as the live source of truth; the
 copies inside `AI-Starter.Pack/` are reference duplicates from the same

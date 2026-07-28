@@ -10,37 +10,39 @@ import { rooms } from "@/config/rooms";
 export function Footer() {
   const year = new Date().getFullYear();
 
-  // The footer carries an inset shadow along its top edge rather than only a
-  // hairline border, so the page appears to slide *under* it — closing the
-  // document with the same light-and-shade language the sections use instead of
-  // a flat rule. Inset, so it never overlaps the content above.
   return (
-    <footer className="border-border/60 bg-secondary/40 relative isolate overflow-hidden border-t shadow-[inset_0_14px_28px_-18px_rgba(24,20,16,0.22)]">
-      {/* Champagne wash rising from the bottom edge — the page closes on the
-          brand's own warm light instead of fading into flat grey. Same accent
-          as the hero kicker rules, the amenity cards and the room rails, so
-          the last thing on screen still belongs to the same palette. Sits
-          behind the content and never darkens the type: the deepest stop is
-          well under the contrast floor for the muted text above it. */}
+    <footer className="border-border/60 from-secondary/50 via-secondary/70 to-secondary/90 relative isolate overflow-hidden border-t bg-gradient-to-b">
+      {/* Top gold accent gradient line */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[70%]"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(184,149,106,0.26) 0%, rgba(184,149,106,0.12) 38%, rgba(184,149,106,0.04) 68%, transparent 100%)",
-        }}
+        className="via-gold/60 absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent to-transparent"
       />
-      {/* A soft bloom in the lower-left corner gives the wash a source rather
-          than letting it read as a flat band of colour. */}
+      {/* Rich champagne gradient rising from the very bottom edge */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -bottom-24 -left-16 -z-10 h-72 w-[42rem] rounded-full opacity-50 blur-3xl"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(184,149,106,0.34) 0%, transparent 70%)",
+            "linear-gradient(to top, rgba(184,149,106,0.38) 0%, rgba(184,149,106,0.18) 40%, rgba(184,149,106,0.05) 75%, transparent 100%)",
         }}
       />
-      <Container className="py-16 md:py-20">
+      {/* Dual ambient light blooms in lower corners */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-28 -left-20 -z-10 h-80 w-[45rem] rounded-full opacity-60 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(184,149,106,0.42) 0%, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 -bottom-28 -z-10 h-80 w-[45rem] rounded-full opacity-40 blur-3xl"
+        style={{
+          background: "radial-gradient(circle, rgba(51,72,47,0.35) 0%, transparent 70%)",
+        }}
+      />
+      <Container className="py-16 md:py-24">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
             <Link

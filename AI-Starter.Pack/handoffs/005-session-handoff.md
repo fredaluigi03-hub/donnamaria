@@ -10,7 +10,7 @@
 
 ## Session
 
-Elite Fitness Club (`elite-motion`) — two parts. First, a memory-only update recording a new approved creative direction ("Quiet Luxury") without touching code. Second, direct hands-on implementation finishing the handoff-004 in-flight content/UX batch: Montemiletto bar copy, asymmetric Coverflow restyle, About-section removal, and the new "Prima e Dopo" (PrimaDopo) section — all built in the *existing* dark red/black cinematic style, by explicit user choice, ahead of a separate future Quiet Luxury redesign pass.
+Elite Fitness Club (`elite-motion`) — two parts. First, a memory-only update recording a new approved creative direction ("Quiet Luxury") without touching code. Second, direct hands-on implementation finishing the handoff-004 in-flight content/UX batch: Montemiletto bar copy, asymmetric Coverflow restyle, About-section removal, and the new "Prima e Dopo" (PrimaDopo) section — all built in the _existing_ dark red/black cinematic style, by explicit user choice, ahead of a separate future Quiet Luxury redesign pass.
 
 ## Current Phase
 
@@ -33,8 +33,9 @@ Elite Fitness Club (`elite-motion`) — two parts. First, a memory-only update r
 ## Decisions Taken
 
 Full detail in `AI-Starter.Pack/memory/decision.md`. New this session:
+
 - Adopted "Quiet Luxury" as the new approved creative direction, retiring dark red/black cinematic — memory-only, no code changed as part of that step.
-- Ship today's content/UX batch in the *current* dark cinematic style; do the Quiet Luxury visual redesign as a separate, later pass — explicit user choice via a direct clarifying question, made because redoing the same components twice (once now, once for Quiet Luxury) was deemed acceptable given the user wanted this content live now.
+- Ship today's content/UX batch in the _current_ dark cinematic style; do the Quiet Luxury visual redesign as a separate, later pass — explicit user choice via a direct clarifying question, made because redoing the same components twice (once now, once for Quiet Luxury) was deemed acceptable given the user wanted this content live now.
 - Build `PrimaDopo` with Carmine and Emilio only for now; defer Umberto until his caption/story is provided — explicit user choice via a direct clarifying question, rather than shipping a placeholder or blocking the section entirely.
 - Executed (not just logged) the prior session's decision to omit Carmine's guarantee-claim language from the published caption.
 
@@ -72,8 +73,9 @@ None of this project's installed skills (`frontend-design`, `ui-ux-pro-max`, `po
 ## Design Direction
 
 Two directions now coexist in this project's memory, deliberately:
+
 - **Shipped code** (as of this session): dark red/black cinematic, unchanged in overall palette from handoff 004 — today's work extended this style's patterns (Coverflow, section rhythm, copy tone) rather than replacing them.
-- **Approved-but-not-yet-implemented**: "Quiet Luxury" (Apple + Technogym + Aman Resort) — bright, daylight-driven, restrained, real editorial photography as the hero, explicitly rejecting nightclub aesthetics and heavy red overlays. See `decision.md` for the full brief. This is the direction all *future* visual work must be evaluated against — but it does not retroactively apply to what shipped this session, by explicit user choice.
+- **Approved-but-not-yet-implemented**: "Quiet Luxury" (Apple + Technogym + Aman Resort) — bright, daylight-driven, restrained, real editorial photography as the hero, explicitly rejecting nightclub aesthetics and heavy red overlays. See `decision.md` for the full brief. This is the direction all _future_ visual work must be evaluated against — but it does not retroactively apply to what shipped this session, by explicit user choice.
 
 ## Technical Notes
 
@@ -133,4 +135,4 @@ The user reviewed the batch above and asked for four more things, all done befor
 
 ### On the Quiet Luxury sequencing
 
-Worth flagging explicitly: these background/texture additions (photo backdrops, warm light-glow, subtle drift) are consistent in spirit with the *language* of the approved Quiet Luxury direction (natural light, restraint, real photography) even though they were implemented inside the still-dark cinematic palette, per the earlier "ship now, redesign later" decision. This is not a contradiction — it's a small, targeted improvement asked for and scoped to backgrounds only, not a start of the full Quiet Luxury rebuild. The full palette/Hero/section-treatment rework remains a separate, not-yet-started piece of work.
+Worth flagging explicitly: these background/texture additions (photo backdrops, warm light-glow, subtle drift) are consistent in spirit with the _language_ of the approved Quiet Luxury direction (natural light, restraint, real photography) even though they were implemented inside the still-dark cinematic palette, per the earlier "ship now, redesign later" decision. This is not a contradiction — it's a small, targeted improvement asked for and scoped to backgrounds only, not a start of the full Quiet Luxury rebuild. The full palette/Hero/section-treatment rework remains a separate, not-yet-started piece of work.

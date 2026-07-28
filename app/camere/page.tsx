@@ -23,6 +23,10 @@ export default function CamerePage() {
         subtitle="Ogni camera racconta un'esperienza diversa — scegli quella più adatta al vostro soggiorno."
         imageSrc="/images/rooms/suite/lettosuiteorizzontale.jpg"
         imageAlt="Letto a baldacchino della Suite Francy nella luce calda della sera"
+        primaryCta={{
+          label: "Richiedi disponibilità",
+          href: "/contatti#richiedi-disponibilita",
+        }}
       />
 
       <Section>

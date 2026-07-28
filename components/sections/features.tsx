@@ -19,6 +19,8 @@ import { Card, CardTitle, CardDescription } from "@/components/ui/card";
 import { Glow } from "@/components/ui/glow";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
 import { FadeIn } from "@/components/animations/fade-in";
+import { Tilt3D } from "@/components/animations/tilt-3d";
+import { cn } from "@/lib/utils";
 
 export interface Service {
   icon: LucideIcon;
@@ -99,9 +101,24 @@ export function Features({
   className,
 }: FeaturesProps) {
   return (
-    <Section className={className}>
+    <Section
+      className={cn(
+        "from-secondary/40 via-secondary/70 to-secondary/30 relative overflow-hidden bg-gradient-to-b py-24 md:py-32",
+        className,
+      )}
+    >
+      {/* Background ambient warm light */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/3 left-10 -z-10 h-[28rem] w-[28rem] rounded-full opacity-40 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(184,149,106,0.25) 0%, transparent 70%)",
+        }}
+      />
+
       <Container>
-        <div className="mb-12 flex flex-col items-start gap-4">
+        <div className="mb-14 flex flex-col items-start gap-4">
           <FadeIn>
             <Kicker>{badgeLabel}</Kicker>
           </FadeIn>
@@ -110,34 +127,32 @@ export function Features({
           </FadeIn>
         </div>
 
-        {/* No `HoverScale` wrapper around these cards: `Card` now owns the
-            hover lift itself (see components/ui/card.tsx), and stacking a scale
-            on top of it gave two competing transforms on the same gesture. */}
-        <Stagger className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <StaggerItem key={service.title} className="relative h-full">
-              {/* Same two-layer champagne bleed as the booking rail on the room
-                  pages, always on rather than hover-only. `subtle` because nine
-                  panels at the rail's full strength wash the whole section —
-                  see components/ui/glow.tsx. */}
-              <Glow subtle />
-              <Card className="h-full gap-0 overflow-hidden p-0">
-                {/* Gold hairline across the top, mirroring the accent bar on the
-                    room Dotazioni panel — the detail that ties the two lists
-                    together as the same kind of object. */}
-                <div
-                  aria-hidden="true"
-                  className="from-gold/70 via-gold to-gold/70 h-0.5 w-full bg-gradient-to-r"
-                />
-                <div className="flex flex-col gap-3 p-6">
-                  <service.icon
-                    className="text-gold size-6 drop-shadow-[0_2px_8px_rgba(184,149,106,0.45)]"
+              <Tilt3D className="h-full w-full">
+                <Glow subtle />
+                <Card className="border-border/80 bg-card/95 hover:border-gold/50 hover:shadow-gold/15 flex h-full flex-col gap-0 overflow-hidden rounded-2xl p-0 shadow-md shadow-black/5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <div
                     aria-hidden="true"
+                    className="from-gold/70 via-gold to-gold/70 h-1 w-full bg-gradient-to-r"
                   />
-                  <CardTitle>{service.title}</CardTitle>
-                  <CardDescription>{service.description}</CardDescription>
-                </div>
-              </Card>
+                  <div className="flex flex-col gap-3.5 p-7">
+                    <div className="bg-gold/10 flex size-11 items-center justify-center rounded-xl">
+                      <service.icon
+                        className="text-gold size-5.5 drop-shadow-[0_2px_8px_rgba(184,149,106,0.45)]"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <CardTitle className="text-lg font-semibold tracking-tight">
+                      {service.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm leading-relaxed">
+                      {service.description}
+                    </CardDescription>
+                  </div>
+                </Card>
+              </Tilt3D>
             </StaggerItem>
           ))}
         </Stagger>

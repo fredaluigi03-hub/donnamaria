@@ -50,12 +50,15 @@ function Stepper({
           onClick={decrement}
           disabled={value <= min}
           aria-label={`Diminuisci ${label.toLowerCase()}`}
-          className="border-input flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:enabled:bg-accent"
+          className="border-input hover:enabled:bg-accent flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Minus className="size-3.5" aria-hidden="true" />
         </button>
 
-        <span className="w-4 text-center text-sm font-medium tabular-nums" aria-live="polite">
+        <span
+          className="w-4 text-center text-sm font-medium tabular-nums"
+          aria-live="polite"
+        >
           {value}
         </span>
 
@@ -64,7 +67,7 @@ function Stepper({
           onClick={increment}
           disabled={value >= max}
           aria-label={`Aumenta ${label.toLowerCase()}`}
-          className="border-input flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40 hover:enabled:bg-accent"
+          className="border-input hover:enabled:bg-accent flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="size-3.5" aria-hidden="true" />
         </button>

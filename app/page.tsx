@@ -67,8 +67,8 @@ export default function HomePage() {
       </Container>
 
       <RoomsShowcase />
-      <Features className="bg-secondary/30" />
       <GalleryPreview />
+      <Features className="bg-secondary/30" />
       <Testimonials />
       <LocationContact />
       <Cta />

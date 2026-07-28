@@ -25,6 +25,8 @@ export interface RoomNavProps {
  * includes non-serializable icon components) straight to JSX without ever
  * crossing a client-component prop boundary.
  */
+import { Tilt3D } from "@/components/animations/tilt-3d";
+
 export function RoomNav({ otherRooms }: RoomNavProps) {
   const lenis = useLenis();
 
@@ -37,39 +39,56 @@ export function RoomNav({ otherRooms }: RoomNavProps) {
   }
 
   return (
-    // Pulled UP with a negative margin, not merely given less padding: the
-    // section above contributes ~176px of bottom padding of its own, so
-    // trimming this one's top padding alone still left a screenful of dead air
-    // between the gallery and this closing row.
-    <Section className="-mt-16 pt-0 pb-8 md:-mt-24 md:pb-10">
-      <Container className="flex flex-col items-center gap-4">
-        <FadeIn className="flex flex-wrap items-center justify-center gap-2">
-          <Button asChild variant="outline">
-            <Link href="/">
-              <Home aria-hidden="true" />
-              Home
-            </Link>
-          </Button>
-          <Button type="button" variant="outline" onClick={scrollToTop}>
-            <ArrowUp aria-hidden="true" />
-            Torna su
-          </Button>
+    <Section className="relative py-16 md:py-20">
+      <Container className="flex flex-col items-center gap-8">
+        <FadeIn className="flex flex-col items-center gap-2 text-center">
+          <span className="text-gold text-xs font-semibold tracking-[0.3em] uppercase">
+            Esplora le altre dimore
+          </span>
+          <p className="font-display text-muted-foreground text-lg font-light italic">
+            Ogni camera ha una sua storia speciale.
+          </p>
         </FadeIn>
 
-        <FadeIn delay={0.05} className="flex flex-col items-center gap-2">
-          <p className="text-muted-foreground text-xs font-medium tracking-[0.18em] uppercase">
-            Scopri le altre camere
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {otherRooms.map((other) => (
-              <Button key={other.slug} asChild variant="ghost">
-                <Link href={`/camere/${other.slug}`}>
-                  {other.name}
-                  <ArrowRight aria-hidden="true" />
-                </Link>
-              </Button>
-            ))}
-          </div>
+        <FadeIn delay={0.05} className="flex flex-wrap items-center justify-center gap-4">
+          <Tilt3D>
+            <button
+              type="button"
+              onClick={scrollToTop}
+              className="group border-gold/40 bg-card/90 hover:border-gold hover:bg-gold/10 text-foreground hover:shadow-gold/20 inline-flex items-center gap-2.5 rounded-full border px-6 py-3 text-xs font-semibold tracking-widest uppercase shadow-xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+            >
+              <ArrowUp
+                className="text-gold size-4 transition-transform duration-300 group-hover:-translate-y-1"
+                aria-hidden="true"
+              />
+              Torna in alto
+            </button>
+          </Tilt3D>
+
+          <Tilt3D>
+            <Link
+              href="/"
+              className="group border-gold/40 bg-card/90 hover:border-gold hover:bg-gold/10 text-foreground hover:shadow-gold/20 inline-flex items-center gap-2.5 rounded-full border px-6 py-3 text-xs font-semibold tracking-widest uppercase shadow-xl shadow-black/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+            >
+              <Home className="text-gold size-4" aria-hidden="true" />
+              Torna alla Home
+            </Link>
+          </Tilt3D>
+
+          {otherRooms.map((other) => (
+            <Tilt3D key={other.slug}>
+              <Link
+                href={`/camere/${other.slug}`}
+                className="group border-gold/30 bg-card/80 hover:border-gold hover:bg-gold/10 text-foreground inline-flex items-center gap-2 rounded-full border px-6 py-3 text-xs font-medium tracking-widest uppercase shadow-lg shadow-black/5 backdrop-blur-md transition-all duration-300 hover:-translate-y-1"
+              >
+                <span>{other.name}</span>
+                <ArrowRight
+                  className="text-gold size-4 transition-transform duration-300 group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </Link>
+            </Tilt3D>
+          ))}
         </FadeIn>
       </Container>
     </Section>

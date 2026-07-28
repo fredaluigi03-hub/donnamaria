@@ -38,11 +38,51 @@ const accentBarClass: Record<Room["accent"], string> = {
  * layered warm shadows, per-room accent — so clicking "Scopri la camera"
  * lands on a page that continues the sentence instead of switching template.
  */
+import { Tilt3D } from "@/components/animations/tilt-3d";
+
+const roomDetailThemeConfig: Record<
+  Room["accent"],
+  {
+    taglineColor: string;
+    numeralColor: string;
+    cardBorder: string;
+    chipStyle: string;
+    buttonStyle: string;
+  }
+> = {
+  suite: {
+    taglineColor: "text-[#b8956a]",
+    numeralColor: "text-[#b8956a]/25",
+    cardBorder: "border-[#b8956a]/40 hover:border-[#b8956a]/80",
+    chipStyle: "bg-[#b8956a]/15 text-[#8a683e] border-[#b8956a]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] text-amber-100 border-[#b8956a]/50 hover:shadow-amber-500/30",
+  },
+  domi: {
+    taglineColor: "text-[#1e6edc]",
+    numeralColor: "text-[#1e6edc]/25",
+    cardBorder: "border-[#1e6edc]/40 hover:border-[#1e6edc]/80",
+    chipStyle: "bg-[#1e6edc]/15 text-[#134997] border-[#1e6edc]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#0d1e38] via-[#162e54] to-[#0d1e38] text-blue-100 border-[#1e6edc]/50 hover:shadow-blue-500/30",
+  },
+  mery: {
+    taglineColor: "text-[#e6558b]",
+    numeralColor: "text-[#e6558b]/25",
+    cardBorder: "border-[#e6558b]/40 hover:border-[#e6558b]/80",
+    chipStyle: "bg-[#e6558b]/15 text-[#9e2753] border-[#e6558b]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#331120] via-[#4d1a30] to-[#331120] text-pink-100 border-[#e6558b]/50 hover:shadow-pink-500/30",
+  },
+};
+
 export function RoomDetail({ room }: { room: Room }) {
   const index = rooms.findIndex((candidate) => candidate.slug === room.slug);
   const otherRooms = rooms
     .filter((candidate) => candidate.slug !== room.slug)
     .map((candidate) => ({ slug: candidate.slug, name: candidate.name }));
+
+  const theme = roomDetailThemeConfig[room.accent];
 
   return (
     <>
@@ -62,11 +102,12 @@ export function RoomDetail({ room }: { room: Room }) {
       <Section>
         <Container className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-16">
           <div className="relative flex flex-col items-start gap-7 lg:col-span-2">
-            {/* Same clipped editorial page-marker as the homepage band for
-                this room — ties the two views of the same room together. */}
             <span
               aria-hidden="true"
-              className="font-display text-foreground/[0.06] pointer-events-none absolute -top-20 -left-4 -z-10 text-[8rem] leading-none font-medium select-none md:text-[11rem]"
+              className={cn(
+                "font-display pointer-events-none absolute -top-20 -left-4 -z-10 text-[8rem] leading-none font-medium select-none md:text-[11rem]",
+                theme.numeralColor,
+              )}
             >
               {String(index + 1).padStart(2, "0")}
             </span>
@@ -75,25 +116,25 @@ export function RoomDetail({ room }: { room: Room }) {
               <Kicker>{room.tagline}</Kicker>
             </FadeIn>
 
-            {/* The room's one-line promise, in the display italic voice the
-                Hero and the band subtitles already use — an editorial lead,
-                not a wall of small muted text. */}
             <FadeIn delay={0.05}>
-              <p className="font-display max-w-2xl text-2xl leading-snug font-light italic md:text-3xl">
+              <p
+                className={cn(
+                  "font-display max-w-2xl text-2xl leading-snug font-medium italic md:text-3xl",
+                  theme.taglineColor,
+                )}
+              >
                 {room.shortDescription}
               </p>
             </FadeIn>
 
             <FadeIn delay={0.1}>
-              <p className="text-muted-foreground max-w-2xl text-lg font-light text-pretty">
+              <p className="text-foreground/90 max-w-2xl text-base leading-relaxed font-light text-pretty md:text-lg">
                 {room.description}
               </p>
             </FadeIn>
 
-            {/* Hairline spec sheet — identical treatment to the homepage
-                bands, replacing the small icon-chip row this page had. */}
             <FadeIn delay={0.15} className="w-full max-w-md">
-              <dl className="border-border/70 divide-border/70 divide-y border-t border-b text-sm">
+              <dl className="border-border/80 divide-border/80 divide-y border-t border-b text-sm">
                 {[
                   { label: "Ospiti", value: room.guests },
                   { label: "Superficie", value: room.size },
@@ -103,10 +144,15 @@ export function RoomDetail({ room }: { room: Room }) {
                     key={row.label}
                     className="flex items-baseline justify-between py-2.5"
                   >
-                    <dt className="text-muted-foreground text-xs tracking-[0.18em] uppercase">
+                    <dt
+                      className={cn(
+                        "text-xs font-semibold tracking-[0.2em] uppercase",
+                        theme.taglineColor,
+                      )}
+                    >
                       {row.label}
                     </dt>
-                    <dd className="text-foreground text-right font-medium">
+                    <dd className="text-foreground text-right font-semibold">
                       {row.value}
                     </dd>
                   </div>
@@ -114,14 +160,6 @@ export function RoomDetail({ room }: { room: Room }) {
               </dl>
             </FadeIn>
 
-            {/* Gallery lives INSIDE the left column, not in its own section
-                below: the booking rail on the right is `sticky`, and sticky
-                only has travel while its own grid row is taller than it is.
-                With the gallery here the left column towers past the rail, so
-                "Richiedi disponibilità" genuinely follows the visitor while
-                they flip through the photos — which is exactly when they
-                decide. A separate full-width gallery section left the rail
-                with zero travel (left column ~650px vs rail ~700px). */}
             <div className="mt-6 flex w-full flex-col items-start gap-4">
               <FadeIn>
                 <Kicker>Galleria</Kicker>
@@ -132,56 +170,66 @@ export function RoomDetail({ room }: { room: Room }) {
                 </SectionTitle>
               </FadeIn>
               <FadeIn delay={0.1} className="w-full">
-                <RoomGalleryCoverflow images={room.gallery} />
+                <Tilt3D className="w-full">
+                  <RoomGalleryCoverflow images={room.gallery} />
+                </Tilt3D>
               </FadeIn>
             </div>
           </div>
 
-          {/* Booking rail: sticky on desktop so the one action that matters
-              keeps itself in reach while the visitor reads and scrolls the
-              gallery. `Card` brings the site-wide layered warm shadow and
-              hover lift; the accent bar on top is the room's own colour. */}
           <FadeIn delay={0.1}>
-            {/* Sticky lives on this wrapper, not on the Card, so the accent
-                glow below travels with the rail instead of being left behind
-                at the top of the column. */}
             <div className="relative lg:sticky lg:top-28">
-              {/* The room's own colour, bleeding out softly from behind the
-                  rail — same light-bleed language as the photos, so the one
-                  panel that asks for the booking sits in a pool of the room's
-                  identity (gold / blue / rose) instead of on bare ground. */}
-              <Glow accentClass={accentBarClass[room.accent]} />
-              <Card className="gap-0 overflow-hidden p-0">
-                <div
-                  aria-hidden="true"
-                  className={cn("h-1 w-full", accentBarClass[room.accent])}
-                />
-                <div className="flex flex-col gap-4 p-6">
-                  <p className="font-display text-lg font-medium tracking-tight">
-                    Dotazioni
-                  </p>
-                  <Stagger className="flex flex-col gap-3" staggerChildren={0.05}>
-                    {room.amenities.map((amenity) => (
-                      <StaggerItem
-                        key={amenity.label}
-                        className="flex items-center gap-3"
-                      >
-                        <amenity.icon
-                          className="text-gold size-4.5 shrink-0"
-                          aria-hidden="true"
-                        />
-                        <span className="text-sm">{amenity.label}</span>
-                      </StaggerItem>
-                    ))}
-                  </Stagger>
-                  <Button asChild size="lg" className="mt-2">
-                    <Link href={`/contatti?camera=${room.slug}#richiedi-disponibilita`}>
-                      Richiedi disponibilità
-                      <ArrowRight aria-hidden="true" />
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
+              <Tilt3D className="w-full">
+                <Glow accentClass={accentBarClass[room.accent]} />
+                <Card
+                  className={cn(
+                    "bg-card/95 gap-0 overflow-hidden rounded-3xl border p-0 shadow-2xl shadow-black/10 transition-all duration-500",
+                    theme.cardBorder,
+                  )}
+                >
+                  <div
+                    aria-hidden="true"
+                    className={cn("h-1.5 w-full", accentBarClass[room.accent])}
+                  />
+                  <div className="flex flex-col gap-5 p-7 md:p-8">
+                    <p
+                      className={cn(
+                        "font-display text-xl font-semibold tracking-tight",
+                        theme.taglineColor,
+                      )}
+                    >
+                      Dotazioni &amp; Comfort
+                    </p>
+                    <Stagger className="flex flex-col gap-3.5" staggerChildren={0.05}>
+                      {room.amenities.map((amenity) => (
+                        <StaggerItem
+                          key={amenity.label}
+                          className={cn(
+                            "flex items-center gap-3 rounded-2xl border px-4 py-2.5 text-sm font-medium shadow-xs transition-all",
+                            theme.chipStyle,
+                          )}
+                        >
+                          <amenity.icon className="size-5 shrink-0" aria-hidden="true" />
+                          <span>{amenity.label}</span>
+                        </StaggerItem>
+                      ))}
+                    </Stagger>
+                    <Button
+                      asChild
+                      size="lg"
+                      className={cn(
+                        "mt-3 h-14 rounded-2xl border text-xs font-semibold tracking-widest uppercase shadow-lg transition-all hover:scale-[1.02]",
+                        theme.buttonStyle,
+                      )}
+                    >
+                      <Link href={`/contatti?camera=${room.slug}#richiedi-disponibilita`}>
+                        Richiedi disponibilità
+                        <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  </div>
+                </Card>
+              </Tilt3D>
             </div>
           </FadeIn>
         </Container>

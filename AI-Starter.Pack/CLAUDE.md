@@ -303,6 +303,7 @@ When starting a new client:
 9. Deploy
 
 ---
+
 Before proposing any implementation:
 
 1. Explore multiple creative directions.
@@ -310,6 +311,7 @@ Before proposing any implementation:
 3. Reject average ideas.
 4. Select the strongest concept.
 5. Only then start implementation.
+
 # Prompts
 
 Whenever a task is finished:
@@ -333,6 +335,7 @@ DO NOT COMMIT.
 Fix every error first.
 
 Only push production-ready code.
+
 ## Session Handoff Rule
 
 Whenever a major milestone is completed or the conversation becomes long, create a Session Handoff before continuing in a new session.

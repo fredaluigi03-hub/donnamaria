@@ -32,6 +32,7 @@ Elite Fitness Club (`elite-motion`) — direct hands-on implementation session (
 ## Decisions Taken
 
 Full detail in `AI-Starter.Pack/memory/decision.md`. Summary of what's new this session (all supersede handoff 003's plan):
+
 - The "Boutique Precision" light-mode direction is abandoned in favor of the dark red/black cinematic direction actually implemented in `src/styles.css`.
 - Both `Hero3D` and `WeightRoom3D` (and the planned `SpecBadge3D`) are moot — the shipped site uses plain CSS/Framer Motion transitions, no 3D, contradicting the prior plan's centerpiece idea. Three.js/`@react-three/fiber`/`drei` remain installed but unused.
 - Lovable's asset pipeline is bypassed entirely for real media; `public/` self-hosting is now the standing convention.

@@ -23,9 +23,9 @@ export function Reveal({ children, className, delay = 0, once = true }: RevealPr
   const shouldReduceMotion = useReducedMotion();
 
   // Test temporaneo
-// if (shouldReduceMotion) {
-//   return <div className={className}>{children}</div>;
-// }
+  // if (shouldReduceMotion) {
+  //   return <div className={className}>{children}</div>;
+  // }
 
   return (
     <div className={cn("relative overflow-hidden", className)}>

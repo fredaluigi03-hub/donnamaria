@@ -101,7 +101,10 @@ export function OutdoorExperience() {
           </motion.div>
 
           {showVideo && (
-            <BackgroundVideo src="/videos/pool.mp4" poster="/images/pool-fallback.webp" />
+            <BackgroundVideo
+              src="/videos/pool-dinamic.mp4"
+              poster="/images/pool-fallback.webp"
+            />
           )}
         </motion.div>
 

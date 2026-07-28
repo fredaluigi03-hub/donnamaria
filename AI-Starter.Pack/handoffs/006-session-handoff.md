@@ -155,7 +155,7 @@ not duplicated in this memory file.
 ## Technical Notes
 
 - `Hero.tsx`: `SCRUB_TRACK_VH = 160` (module-level constant), `SCRUB_END =
-  0.85` (fraction of the pinned track spent scrubbing vs. the exit fade),
+0.85` (fraction of the pinned track spent scrubbing vs. the exit fade),
   both in `components/sections/hero.tsx`. `isPinned = showScrub` gates
   both the wrapper's extra height and which ref `useScroll` targets.
 - `ScrollScrubSequence`: frames referenced as

@@ -186,8 +186,9 @@ export function Hero({
   const textInputRange = isPinned
     ? [0, 0.1, SCRUB_END, TEXT_IN, PINNED_END, 1]
     : [exitStart, 1];
-  const textOpacityRange = isPinned ? [0, 0, 0, 1, 1, 0.45] : [1, 0.45];
-  const textYRange = isPinned ? [12, 12, 12, 0, 0, 36] : [0, 36];
+  // Text remains fully visible throughout the video scrub per user directive
+  const textOpacityRange = isPinned ? [1, 1, 1, 1, 1, 0.85] : [1, 0.85];
+  const textYRange = isPinned ? [0, 0, 0, 0, 0, 12] : [0, 12];
   const scrollOpacity = useTransform(scrollYProgress, textInputRange, textOpacityRange);
   const scrollY = useTransform(scrollYProgress, textInputRange, textYRange);
   // Subtle "parallax on exit" for the background itself (video or image) —
@@ -308,32 +309,21 @@ export function Hero({
             <Container className="flex flex-col items-center gap-6 py-28 text-center md:py-32">
               {kicker && (
                 <FadeIn distance={10} delay={0.6} duration={1}>
-                  <span className="flex items-center justify-center gap-3 text-xs font-medium tracking-[0.35em] text-white/85 uppercase">
-                    <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
+                  <span className="text-gold flex items-center justify-center gap-3 text-xs font-semibold tracking-[0.35em] uppercase drop-shadow-[0_2px_10px_rgba(184,149,106,0.6)]">
+                    <span className="bg-gold h-px w-10" aria-hidden="true" />
                     {kicker}
-                    <span className="bg-gold/70 h-px w-8" aria-hidden="true" />
+                    <span className="bg-gold h-px w-10" aria-hidden="true" />
                   </span>
                 </FadeIn>
               )}
 
-              {/* The soft shadow here is doing two jobs, not one: it lifts the
-                  type off the footage the way light and shade do on the section
-                  headings, and it guarantees legibility over a *moving*
-                  background whose brightness changes frame to frame as the
-                  scrub runs from the lamp-lit deck into bright pool water. Wide
-                  and soft (24px, 45%), never a hard offset — a crisp drop
-                  shadow over video reads as a caption, not as a title. */}
-              <h1 className="font-display max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-white [text-shadow:0_2px_24px_rgba(10,8,6,0.45)] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
+              <h1 className="font-display max-w-4xl text-4xl leading-[1.02] font-medium tracking-tight text-white [text-shadow:0_2px_24px_rgba(10,8,6,0.5)] sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
                 <TextReveal text={title} delay={0.8} />
               </h1>
 
               {subtitle && (
                 <FadeIn delay={1.2} duration={1} className="max-w-xl">
-                  {/* Display italic, not the sans body font — a quiet
-                      editorial-magazine touch (a distinct type voice for
-                      the subtitle line) that a generic template's single
-                      sans-for-everything system doesn't have. */}
-                  <p className="font-display text-lg font-light text-white/85 italic [text-shadow:0_1px_16px_rgba(10,8,6,0.4)] md:text-xl">
+                  <p className="font-display text-lg font-light text-amber-50/90 italic [text-shadow:0_1px_16px_rgba(10,8,6,0.4)] md:text-xl">
                     {subtitle}
                   </p>
                 </FadeIn>
@@ -343,13 +333,13 @@ export function Hero({
                 <FadeIn
                   delay={1.6}
                   duration={1}
-                  className="mt-2 flex flex-wrap items-center justify-center gap-8"
+                  className="mt-4 flex flex-wrap items-center justify-center gap-6"
                 >
                   {primaryCta && (
                     <Button
                       size="lg"
                       asChild
-                      className="h-auto bg-white px-8 py-3.5 text-sm font-medium text-neutral-900 shadow-none hover:bg-white/90"
+                      className="border-gold/40 hover:shadow-gold/30 h-auto border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-8 py-3.5 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105"
                     >
                       <Link href={primaryCta.href}>
                         {primaryCta.label}
@@ -357,22 +347,18 @@ export function Hero({
                       </Link>
                     </Button>
                   )}
-                  {/* A single quiet wayfinding link, not a second competing
-                      button — one confident action per hero, per the luxury
-                      reference brands (see docs/02_CREATIVE_DIRECTION.md's
-                      "Restraint"). */}
                   {secondaryCta && (
                     <Link
                       href={secondaryCta.href}
-                      className="group inline-flex items-center gap-2 text-sm font-medium text-white/90 transition-colors hover:text-white"
+                      className="group border-gold/40 hover:border-gold rounded-full border bg-black/30 px-6 py-3 text-xs font-semibold tracking-widest text-amber-100 uppercase backdrop-blur-md transition-all duration-300 hover:bg-black/50 hover:text-white"
                     >
-                      <span className="underline-offset-4 group-hover:underline">
+                      <span className="inline-flex items-center gap-2">
                         {secondaryCta.label}
+                        <ArrowRight
+                          className="text-gold size-4 transition-transform duration-300 group-hover:translate-x-1"
+                          aria-hidden="true"
+                        />
                       </span>
-                      <ArrowRight
-                        className="size-4 transition-transform duration-300 group-hover:translate-x-1"
-                        aria-hidden="true"
-                      />
                     </Link>
                   )}
                 </FadeIn>

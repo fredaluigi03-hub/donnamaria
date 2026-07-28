@@ -24,15 +24,46 @@ const accentDotClass: Record<Room["accent"], string> = {
   mery: "bg-room-mery",
 };
 
-/**
- * One room, presented as a full editorial band rather than a card.
- *
- * Three separate planes move at three different rates as the band crosses the
- * viewport — the index numeral fastest, the frame at page rate, the photo
- * inside it slowest — which is what actually produces the sense of depth.
- * Everything is Parallax / Mask / Slow Scale / Hover Lift, the vocabulary
- * docs/03_DESIGN_SYSTEM.md allows; nothing spins, bounces or flashes.
- */
+const roomThemeConfig: Record<
+  Room["accent"],
+  {
+    glow: string;
+    taglineColor: string;
+    numeralColor: string;
+    cardBorder: string;
+    chipStyle: string;
+    buttonStyle: string;
+  }
+> = {
+  suite: {
+    glow: "radial-gradient(circle, rgba(212, 160, 80, 0.95) 0%, rgba(184, 149, 106, 0.65) 45%, transparent 75%)",
+    taglineColor: "text-[#b8956a]",
+    numeralColor: "text-[#b8956a]/25",
+    cardBorder: "border-[#b8956a]/40 hover:border-[#b8956a]/80",
+    chipStyle: "bg-[#b8956a]/15 text-[#8a683e] border-[#b8956a]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] text-amber-100 border-[#b8956a]/50 hover:shadow-amber-500/30",
+  },
+  domi: {
+    glow: "radial-gradient(circle, rgba(30, 110, 240, 0.95) 0%, rgba(20, 90, 200, 0.65) 45%, transparent 75%)",
+    taglineColor: "text-[#1e6edc]",
+    numeralColor: "text-[#1e6edc]/25",
+    cardBorder: "border-[#1e6edc]/40 hover:border-[#1e6edc]/80",
+    chipStyle: "bg-[#1e6edc]/15 text-[#134997] border-[#1e6edc]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#0d1e38] via-[#162e54] to-[#0d1e38] text-blue-100 border-[#1e6edc]/50 hover:shadow-blue-500/30",
+  },
+  mery: {
+    glow: "radial-gradient(circle, rgba(250, 100, 160, 0.95) 0%, rgba(225, 75, 135, 0.65) 45%, transparent 75%)",
+    taglineColor: "text-[#e6558b]",
+    numeralColor: "text-[#e6558b]/25",
+    cardBorder: "border-[#e6558b]/40 hover:border-[#e6558b]/80",
+    chipStyle: "bg-[#e6558b]/15 text-[#9e2753] border-[#e6558b]/40",
+    buttonStyle:
+      "bg-gradient-to-r from-[#331120] via-[#4d1a30] to-[#331120] text-pink-100 border-[#e6558b]/50 hover:shadow-pink-500/30",
+  },
+};
+
 function RoomBand({ room, index }: { room: Room; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const shouldReduceMotion = useReducedMotion();
@@ -41,51 +72,28 @@ function RoomBand({ room, index }: { room: Room; index: number }) {
     target: ref,
     offset: ["start end", "end start"],
   });
-  // Photo drifts against the scroll (slowest plane) and eases out of its own
-  // slow zoom — a scroll-driven Ken Burns rather than a timed loop, so the
-  // movement only ever happens because the visitor is scrolling.
+
   const photoY = useTransform(scrollYProgress, [0, 1], ["-6%", "6%"]);
   const photoScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.14, 1.06, 1.14]);
-  // Numeral travels furthest, so it reads as the layer nearest the viewer.
   const numeralY = useTransform(scrollYProgress, [0, 1], [64, -64]);
 
-  // Alternate which side the photo sits on, so the eye zig-zags down the page
-  // instead of scanning a repeating column.
   const photoFirst = index % 2 === 0;
+  const theme = roomThemeConfig[room.accent];
 
   return (
-    <div ref={ref} className="grid items-center gap-8 md:grid-cols-2 md:gap-14 lg:gap-20">
-      <Tilt3D className={cn("relative", photoFirst ? "md:order-1" : "md:order-2")}>
-        {/* Light bleed: the same photo again, blown up slightly past the frame
-            and heavily blurred, sitting *behind* it. Its colours spill out from
-            under every edge, so the picture reads as a lit object throwing its
-            own glow onto the page rather than a rectangle pasted on top — and
-            because the glow is sampled from the photo itself, each room casts
-            its own colour (amber suite, blue Domi, rose Mery) with nothing
-            hand-tuned per room.
-
-            `sizes="12vw"` is deliberate, not a mistake: the layer is blurred
-            into mush anyway, so Next only needs to ship a thumbnail for it.
-            Blurring a small bitmap and scaling it up costs a fraction of
-            blurring the full-resolution one, and looks identical. */}
+    <div
+      ref={ref}
+      className="relative grid items-center gap-8 md:grid-cols-2 md:gap-14 lg:gap-20"
+    >
+      <Tilt3D className={cn("relative z-10", photoFirst ? "md:order-1" : "md:order-2")}>
+        {/* Bright high-intensity custom color light glow behind room photo */}
         <div
           aria-hidden="true"
-          className="absolute inset-0 -z-10 scale-[1.06] opacity-60 blur-[52px] saturate-150"
-        >
-          <div className="relative h-full w-full">
-            <Image
-              src={room.coverImage}
-              alt=""
-              fill
-              quality={40}
-              sizes="12vw"
-              className="rounded-3xl object-cover"
-            />
-          </div>
-        </div>
+          className="pointer-events-none absolute -inset-14 -z-10 rounded-full opacity-100 blur-3xl transition-all duration-500 md:-inset-20"
+          style={{ background: theme.glow }}
+        />
 
         <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-[0_24px_60px_-24px_rgba(0,0,0,0.45)] sm:rounded-3xl">
-          {/* Overscanned (-inset-y) so the parallax drift never exposes an edge. */}
           <motion.div
             className="absolute inset-x-0 -inset-y-12"
             style={shouldReduceMotion ? undefined : { y: photoY, scale: photoScale }}
@@ -100,14 +108,6 @@ function RoomBand({ room, index }: { room: Room; index: number }) {
             />
           </motion.div>
 
-          {/* Curtain mask: retracts upward as the band enters, uncovering a
-              photo that's already mid-zoom underneath — the two together read
-              as a shot being revealed rather than an image popping in.
-              Driven by scaleY (a transform, so it stays on the compositor)
-              rather than clip-path, and always mounted with the reveal always
-              defined — reduced motion is honored by collapsing the duration to
-              zero, the same way the Hero does it, so the curtain can never be
-              left stuck over the photo. */}
           <motion.div
             aria-hidden="true"
             className="bg-background absolute inset-0 origin-top"
@@ -120,12 +120,11 @@ function RoomBand({ room, index }: { room: Room; index: number }) {
             }}
           />
 
-          {/* Grounds the photo against the page and deepens the lower edge. */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
 
           <span
             className={cn(
-              "absolute top-5 left-5 size-2.5 rounded-full",
+              "absolute top-5 left-5 size-3.5 rounded-full shadow-[0_0_15px_rgba(255,255,255,0.8)]",
               accentDotClass[room.accent],
             )}
             aria-hidden="true"
@@ -133,18 +132,20 @@ function RoomBand({ room, index }: { room: Room; index: number }) {
         </div>
       </Tilt3D>
 
-      <div
+      <Tilt3D
         className={cn(
-          "relative flex flex-col items-start gap-5",
+          "bg-card/90 relative flex flex-col items-start gap-5 rounded-3xl border p-8 shadow-xl shadow-black/5 backdrop-blur-md transition-all duration-500 md:p-10",
+          theme.cardBorder,
           photoFirst ? "md:order-2" : "md:order-1",
         )}
       >
-        {/* Oversized numeral, deliberately behind the copy and clipped by the
-            column — an editorial page-marker, not a badge. */}
         <motion.span
           aria-hidden="true"
           style={shouldReduceMotion ? undefined : { y: numeralY }}
-          className="font-display text-foreground/[0.07] pointer-events-none absolute -top-16 -left-4 -z-10 text-[7rem] leading-none font-medium select-none md:text-[9rem]"
+          className={cn(
+            "font-display pointer-events-none absolute -top-14 -right-4 -z-10 text-[7rem] leading-none font-medium select-none md:text-[9rem]",
+            theme.numeralColor,
+          )}
         >
           {String(index + 1).padStart(2, "0")}
         </motion.span>
@@ -156,69 +157,77 @@ function RoomBand({ room, index }: { room: Room; index: number }) {
         </FadeIn>
 
         <FadeIn delay={0.05}>
-          <p className="font-display text-muted-foreground max-w-md text-xl font-light italic">
+          <p
+            className={cn(
+              "font-display max-w-md text-xl font-medium italic",
+              theme.taglineColor,
+            )}
+          >
             {room.tagline}
           </p>
         </FadeIn>
 
-        {/* The band's copy used to stop here — name, one line, three meta
-            items — which left a tall void beside a 4:5 photo and read as
-            unfinished rather than airy. `shortDescription` and `amenities`
-            were already in config/rooms.ts and simply weren't being shown. */}
         <FadeIn delay={0.1}>
-          <p className="text-muted-foreground max-w-md text-pretty">
+          <p className="text-foreground/90 max-w-md text-sm leading-relaxed font-light text-pretty md:text-base">
             {room.shortDescription}
           </p>
         </FadeIn>
 
-        {/* Spec sheet, not a chip row: label left, value right, hairline
-            between. Precise and quiet — the detail that reads as considered. */}
         <FadeIn delay={0.15} className="w-full max-w-md">
-          <dl className="border-border/70 divide-border/70 divide-y border-t border-b text-sm">
+          <dl className="border-border/80 divide-border/80 divide-y border-t border-b text-sm">
             {[
               { label: "Ospiti", value: room.guests },
               { label: "Superficie", value: room.size },
               { label: "Letto", value: room.bedType },
             ].map((row) => (
               <div key={row.label} className="flex items-baseline justify-between py-2.5">
-                <dt className="text-muted-foreground text-xs tracking-[0.18em] uppercase">
+                <dt
+                  className={cn(
+                    "text-xs font-semibold tracking-[0.2em] uppercase",
+                    theme.taglineColor,
+                  )}
+                >
                   {row.label}
                 </dt>
-                <dd className="text-foreground text-right font-medium">{row.value}</dd>
+                <dd className="text-foreground text-right font-semibold">{row.value}</dd>
               </div>
             ))}
           </dl>
         </FadeIn>
 
         <FadeIn delay={0.2} className="max-w-md">
-          <ul className="flex flex-wrap gap-x-5 gap-y-2">
+          <ul className="flex flex-wrap gap-x-3 gap-y-2">
             {room.amenities.slice(0, 4).map((amenity) => (
               <li
                 key={amenity.label}
-                className="text-muted-foreground inline-flex items-center gap-2 text-sm"
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-semibold shadow-xs transition-all",
+                  theme.chipStyle,
+                )}
               >
-                <amenity.icon className="text-gold size-4" aria-hidden="true" />
+                <amenity.icon className="size-3.5" aria-hidden="true" />
                 {amenity.label}
               </li>
             ))}
           </ul>
         </FadeIn>
 
-        <FadeIn delay={0.25}>
+        <FadeIn delay={0.25} className="pt-2">
           <Link
             href={`/camere/${room.slug}`}
-            className="group text-foreground inline-flex items-center gap-2 text-sm font-medium"
+            className={cn(
+              "group inline-flex items-center gap-2.5 rounded-full border px-7 py-3 text-xs font-semibold tracking-widest uppercase shadow-lg transition-all duration-300 hover:scale-105",
+              theme.buttonStyle,
+            )}
           >
-            <span className="underline-offset-4 group-hover:underline">
-              Scopri la camera
-            </span>
+            <span>Scopri la camera</span>
             <ArrowRight
               className="size-4 transition-transform duration-300 group-hover:translate-x-1"
               aria-hidden="true"
             />
           </Link>
         </FadeIn>
-      </div>
+      </Tilt3D>
     </div>
   );
 }
@@ -244,7 +253,17 @@ export function RoomsShowcase({ bare = false }: RoomsShowcaseProps) {
   if (bare) return bands;
 
   return (
-    <Section id="suites" className="scroll-mt-28">
+    <Section id="suites" className="relative scroll-mt-28 overflow-hidden py-24 md:py-32">
+      {/* Background ambient warm light pool */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/4 left-1/2 -z-10 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(184,149,106,0.2) 0%, transparent 70%)",
+        }}
+      />
+
       <Container>
         <div className="mb-14 flex flex-col items-start gap-4 md:mb-20">
           <FadeIn>

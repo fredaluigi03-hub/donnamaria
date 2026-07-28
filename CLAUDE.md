@@ -8,6 +8,7 @@ Before starting any frontend or UI task, Claude MUST:
 4. Plan the solution before editing code.
 5. Implement production-quality code.
 6. Self-review the result before finishing.
+
 # CLAUDE.md
 
 Instructions for any AI coding agent (Claude Code, Cursor, etc.) working

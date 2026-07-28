@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Glow } from "@/components/ui/glow";
 import { Stagger, StaggerItem } from "@/components/animations/stagger";
 import { FadeIn } from "@/components/animations/fade-in";
+import { Tilt3D } from "@/components/animations/tilt-3d";
 import { siteConfig } from "@/config/site";
 
 interface Review {
@@ -48,9 +49,19 @@ const reviews: Review[] = [
  */
 export function Testimonials() {
   return (
-    <Section className="bg-secondary/30">
+    <Section className="from-secondary/30 via-secondary/60 to-secondary/20 relative overflow-hidden bg-gradient-to-b py-24 md:py-32">
+      {/* Soft champagne glow in background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 right-1/3 -z-10 h-[30rem] w-[30rem] rounded-full opacity-40 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(184,149,106,0.25) 0%, transparent 70%)",
+        }}
+      />
+
       <Container>
-        <div className="mb-12 flex flex-col items-start gap-4">
+        <div className="mb-14 flex flex-col items-start gap-4">
           <FadeIn>
             <Kicker>Recensioni</Kicker>
           </FadeIn>
@@ -59,39 +70,54 @@ export function Testimonials() {
           </FadeIn>
         </div>
 
-        <Stagger className="grid grid-cols-1 gap-6 md:grid-cols-3" staggerChildren={0.1}>
+        <Stagger className="grid grid-cols-1 gap-8 md:grid-cols-3" staggerChildren={0.1}>
           {reviews.map((review) => (
             <StaggerItem key={review.author} className="relative h-full">
-              {/* Same champagne bleed as the amenities cards and the room
-                  booking rail — a quote panel is the other place on the page
-                  that has to feel worth reading. */}
-              <Glow subtle />
-              <Card className="h-full">
-                <CardContent className="flex h-full flex-col gap-4 pt-6 pb-6">
-                  <div className="flex items-center justify-between">
-                    <Quote className="text-gold size-6" aria-hidden="true" />
-                    {/* Score in the brand champagne, not neutral grey — a 10/10
-                        is the most persuasive pixel on this card and deserves
-                        the accent colour. */}
-                    <Badge className="bg-gold/15 text-gold border-transparent font-semibold">
-                      {review.score}
-                    </Badge>
-                  </div>
-                  <p className="text-foreground grow text-sm text-pretty">
-                    &ldquo;{review.quote}&rdquo;
-                  </p>
-                  <p className="text-muted-foreground text-sm font-medium">
-                    {review.author} — {review.country}
-                  </p>
-                </CardContent>
-              </Card>
+              <Tilt3D className="h-full w-full">
+                <Glow subtle />
+                <Card className="border-border/80 bg-card/90 hover:border-gold/50 hover:shadow-gold/15 flex h-full flex-col overflow-hidden rounded-2xl p-0 shadow-lg shadow-black/5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl">
+                  <div
+                    aria-hidden="true"
+                    className="from-gold/80 via-gold to-gold/80 h-1 w-full bg-gradient-to-r"
+                  />
+                  <CardContent className="flex h-full flex-col justify-between gap-5 p-7">
+                    <div className="flex items-center justify-between">
+                      <div className="bg-gold/10 flex size-10 items-center justify-center rounded-full">
+                        <Quote
+                          className="text-gold size-5 drop-shadow-[0_2px_8px_rgba(184,149,106,0.4)]"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <Badge className="bg-gold/15 text-gold border-gold/30 px-3 py-1 text-xs font-semibold tracking-wide shadow-sm">
+                        Punteggio {review.score}
+                      </Badge>
+                    </div>
+                    <p className="font-display text-foreground text-base leading-relaxed text-pretty italic">
+                      &ldquo;{review.quote}&rdquo;
+                    </p>
+                    <div className="border-border/50 border-t pt-4">
+                      <p className="text-foreground text-xs font-semibold tracking-wider uppercase">
+                        {review.author}
+                      </p>
+                      <p className="text-muted-foreground text-xs font-medium">
+                        {review.country}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </Tilt3D>
             </StaggerItem>
           ))}
         </Stagger>
 
         {siteConfig.reviewsUrl && (
-          <FadeIn delay={0.2} className="mt-10 flex justify-center">
-            <Button variant="outline" size="lg" asChild>
+          <FadeIn delay={0.2} className="mt-12 flex justify-center">
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="rounded-full shadow-sm transition-all hover:shadow-md"
+            >
               <a href={siteConfig.reviewsUrl} target="_blank" rel="noopener noreferrer">
                 Leggi tutte le recensioni
               </a>

@@ -90,13 +90,11 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // When scrolled, navigation links appear inside a horizontal translucent glass bar over the video/sections
+  const showNav = !heroFootagePlaying || scrolled;
+
   return (
     <motion.header
-      // `initial` must stay independent of `useReducedMotion()` — that hook
-      // resolves differently between the server render and the client's
-      // first paint, and changing `initial` (unlike `transition`) changes
-      // the SSR-emitted style attribute, which causes a hydration mismatch.
-      // Reduced motion is instead honored via a zero duration/delay below.
       initial={isHome ? { opacity: 0 } : false}
       animate={{ opacity: 1 }}
       transition={{
@@ -105,160 +103,178 @@ export function Header() {
         ease: "easeOut",
       }}
       className={cn(
-        "sticky top-0 z-30 border-b transition-colors duration-300",
-        transparent
-          ? "border-transparent bg-transparent"
-          : "border-border/60 bg-background/80 backdrop-blur-md",
+        "sticky top-0 z-40 py-3 transition-all duration-500",
+        transparent ? "border-transparent bg-transparent" : "bg-transparent",
       )}
     >
-      <Container className="flex h-20 items-center justify-between py-4">
-        <Link
-          href="/"
-          className="flex items-center gap-3"
-          onClick={() => setOpen(false)}
-          aria-label={siteConfig.name}
-        >
-          <Image
-            src="/images/logo.png"
-            alt=""
-            width={48}
-            height={48}
-            priority
-            className="size-11 shrink-0 object-contain md:size-12"
-          />
-          <span
-            className={cn(
-              "font-display text-lg leading-tight font-semibold tracking-tight transition-colors",
-              transparent ? "text-white" : "text-foreground",
-            )}
-          >
-            Donna Maria
-            <span className="block text-[0.65rem] font-medium tracking-[0.2em] uppercase opacity-80">
-              Suite &amp; Relax
-            </span>
-          </span>
-        </Link>
-
-        {/* `invisible` alongside the fade, not opacity alone: a 0-opacity nav
-            is still clickable and still reachable by keyboard, so links would
-            be sitting invisibly over the footage. */}
-        <nav
-          className={cn(
-            "hidden items-center gap-8 transition-opacity duration-500 ease-(--ease-standard) md:flex",
-            heroFootagePlaying ? "invisible opacity-0" : "visible opacity-100",
-          )}
-          aria-hidden={heroFootagePlaying}
-        >
-          {mainNav.map((item) =>
-            item.href === "/camere" ? (
-              <div
-                key={item.href}
-                ref={roomsMenuRef}
-                className="relative"
-                onMouseEnter={openRoomsMenu}
-                onMouseLeave={scheduleCloseRoomsMenu}
-              >
-                <Link
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-1 text-sm font-medium transition-colors",
-                    transparent
-                      ? "text-white/90 hover:text-white"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                  onClick={() => setRoomsMenuOpen(false)}
-                  aria-haspopup="true"
-                  aria-expanded={roomsMenuOpen}
-                >
-                  {item.label}
-                  <ChevronDown
-                    className={cn(
-                      "size-3.5 transition-transform",
-                      roomsMenuOpen && "rotate-180",
-                    )}
-                    aria-hidden="true"
-                  />
-                </Link>
-
-                <div
-                  className={cn(
-                    "border-border bg-background absolute top-full left-1/2 z-40 mt-3 w-64 -translate-x-1/2 rounded-lg border p-2 shadow-lg transition-all duration-150",
-                    roomsMenuOpen
-                      ? "pointer-events-auto translate-y-0 opacity-100"
-                      : "pointer-events-none translate-y-1 opacity-0",
-                  )}
-                  role="menu"
-                >
-                  <p className="text-muted-foreground px-3 pt-1.5 pb-1 text-xs font-medium tracking-wide uppercase">
-                    Le Camere
-                  </p>
-                  {rooms.map((room) => (
-                    <Link
-                      key={room.slug}
-                      href={`/camere/${room.slug}`}
-                      role="menuitem"
-                      className="text-foreground hover:bg-secondary block rounded-md px-3 py-2 text-sm font-medium transition-colors"
-                      onClick={() => setRoomsMenuOpen(false)}
-                    >
-                      {room.name}
-                    </Link>
-                  ))}
-                  <div className="border-border my-2 border-t" />
-                  {roomsMenuExtraLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      role="menuitem"
-                      className="text-muted-foreground hover:bg-secondary hover:text-foreground block rounded-md px-3 py-2 text-sm transition-colors"
-                      onClick={() => setRoomsMenuOpen(false)}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "text-sm font-medium transition-colors",
-                  transparent
-                    ? "text-white/90 hover:text-white"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            ),
-          )}
-        </nav>
-
+      <Container className="flex items-center justify-between">
         <div
           className={cn(
-            "hidden items-center gap-2 transition-opacity duration-500 ease-(--ease-standard) md:flex",
-            heroFootagePlaying ? "invisible opacity-0" : "visible opacity-100",
+            "flex w-full items-center justify-between p-3.5 transition-all duration-500 md:px-6 md:py-3",
+            scrolled
+              ? "border-gold/40 shadow-gold/15 rounded-2xl border bg-gradient-to-r from-white/95 via-amber-50/90 to-white/95 text-neutral-950 shadow-xl backdrop-blur-xl md:rounded-full"
+              : "bg-transparent text-white",
           )}
-          aria-hidden={heroFootagePlaying}
         >
-          <Button asChild variant={transparent ? "secondary" : "default"}>
-            <Link href="/contatti#richiedi-disponibilita">Prenota Ora</Link>
-          </Button>
-        </div>
+          <Link
+            href="/"
+            className="flex items-center gap-3"
+            onClick={() => setOpen(false)}
+            aria-label={siteConfig.name}
+          >
+            <Image
+              src="/images/logo.png"
+              alt=""
+              width={48}
+              height={48}
+              priority
+              className="size-10 shrink-0 object-contain md:size-11"
+            />
+            <span
+              className={cn(
+                "font-display text-lg leading-tight font-semibold tracking-tight transition-colors",
+                scrolled
+                  ? "text-neutral-950"
+                  : transparent
+                    ? "text-white"
+                    : "text-foreground",
+              )}
+            >
+              Donna Maria
+              <span className="block text-[0.65rem] font-medium tracking-[0.2em] uppercase opacity-80">
+                Suite &amp; Relax
+              </span>
+            </span>
+          </Link>
 
-        <button
-          type="button"
-          className={cn(
-            "inline-flex items-center justify-center rounded-md p-2 md:hidden",
-            transparent ? "text-white" : "text-foreground",
-          )}
-          aria-label={open ? "Chiudi il menu" : "Apri il menu"}
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-        </button>
+          <nav
+            className={cn(
+              "hidden items-center gap-8 transition-all duration-500 md:flex",
+              showNav ? "visible opacity-100" : "invisible opacity-0",
+            )}
+          >
+            {mainNav.map((item) =>
+              item.href === "/camere" ? (
+                <div
+                  key={item.href}
+                  ref={roomsMenuRef}
+                  className="relative"
+                  onMouseEnter={openRoomsMenu}
+                  onMouseLeave={scheduleCloseRoomsMenu}
+                >
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-1 text-sm font-medium transition-colors",
+                      scrolled
+                        ? "hover:text-gold text-neutral-900"
+                        : transparent
+                          ? "text-white/90 hover:text-white"
+                          : "text-muted-foreground hover:text-foreground",
+                    )}
+                    onClick={() => setRoomsMenuOpen(false)}
+                    aria-haspopup="true"
+                    aria-expanded={roomsMenuOpen}
+                  >
+                    {item.label}
+                    <ChevronDown
+                      className={cn(
+                        "size-3.5 transition-transform",
+                        roomsMenuOpen && "rotate-180",
+                      )}
+                      aria-hidden="true"
+                    />
+                  </Link>
+
+                  <div
+                    className={cn(
+                      "border-gold/30 bg-card/95 text-foreground absolute top-full left-1/2 z-50 mt-3 w-64 -translate-x-1/2 rounded-xl border p-2 shadow-2xl backdrop-blur-xl transition-all duration-150",
+                      roomsMenuOpen
+                        ? "pointer-events-auto translate-y-0 opacity-100"
+                        : "pointer-events-none translate-y-1 opacity-0",
+                    )}
+                    role="menu"
+                  >
+                    <p className="text-gold px-3 pt-1.5 pb-1 text-xs font-medium tracking-wide uppercase">
+                      Le Camere
+                    </p>
+                    {rooms.map((room) => (
+                      <Link
+                        key={room.slug}
+                        href={`/camere/${room.slug}`}
+                        role="menuitem"
+                        className="text-foreground hover:bg-gold/10 hover:text-gold block rounded-md px-3 py-2 text-sm font-medium transition-colors"
+                        onClick={() => setRoomsMenuOpen(false)}
+                      >
+                        {room.name}
+                      </Link>
+                    ))}
+                    <div className="border-border/60 my-2 border-t" />
+                    {roomsMenuExtraLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        role="menuitem"
+                        className="text-muted-foreground hover:bg-gold/10 hover:text-gold block rounded-md px-3 py-2 text-sm transition-colors"
+                        onClick={() => setRoomsMenuOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "text-sm font-medium transition-colors",
+                    scrolled
+                      ? "hover:text-gold text-neutral-900"
+                      : transparent
+                        ? "text-white/90 hover:text-white"
+                        : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
+          </nav>
+
+          <div
+            className={cn(
+              "hidden items-center gap-2 transition-all duration-500 md:flex",
+              showNav ? "visible opacity-100" : "invisible opacity-0",
+            )}
+          >
+            <Button
+              asChild
+              className={cn(
+                "rounded-full px-6 transition-all",
+                scrolled
+                  ? "bg-white text-black shadow-md hover:bg-white/90"
+                  : "bg-white/90 text-black hover:bg-white",
+              )}
+            >
+              <Link href="/contatti#richiedi-disponibilita">Prenota Ora</Link>
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            className={cn(
+              "inline-flex items-center justify-center rounded-md p-2 md:hidden",
+              scrolled || transparent ? "text-white" : "text-foreground",
+            )}
+            aria-label={open ? "Chiudi il menu" : "Apri il menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen((prev) => !prev)}
+          >
+            {open ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
+          </button>
+        </div>
       </Container>
 
       <div

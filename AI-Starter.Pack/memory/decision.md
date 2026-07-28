@@ -39,7 +39,7 @@ Reason: With the frame sequence driving the Hero's natural (single
 viewport-height) scroll-out, the scrub and the hero leaving the viewport
 happened simultaneously — the user described this as being "carried
 straight into the pool section" rather than experiencing the video first.
-Wanted two distinct, sequential moments: scrub while pinned, *then* release
+Wanted two distinct, sequential moments: scrub while pinned, _then_ release
 into normal scroll toward `PoolShowcase`.
 
 Impact: `Hero.tsx` now wraps the fullscreen variant in an outer track
@@ -71,9 +71,9 @@ total pinned scroll distance needed to correspond to roughly 5–6 mouse-
 wheel notches, not an arbitrary "long enough to feel cinematic" duration.
 
 Impact: `backgroundScale`'s exit range now maps to `[1, 1]` (no-op — kept
-in code rather than deleted, so the mechanism is still there if a *subtle*
+in code rather than deleted, so the mechanism is still there if a _subtle_
 zoom is wanted later) and `SCRUB_TRACK_VH = 160`. The math: a pinned
-track's *actual* scroll cost is `(SCRUB_TRACK_VH − 100)vh` (the first
+track's _actual_ scroll cost is `(SCRUB_TRACK_VH − 100)vh` (the first
 100vh is just reaching the pinned position), so 160vh ≈ 60vh of real
 scroll ≈ 5.5 wheel notches at a 100px/notch, ~900px-viewport assumption.
 Documented as an assumption in the code comment since wheel step size
@@ -141,7 +141,7 @@ Date: 2026-07-25
 
 Reason: This session's sandbox has no network route to github.com (proxy
 returns 403) and could not clone/push directly. Separately, a stale
-`.git/index.lock` (confirmed to be the *same physical file* on the user's
+`.git/index.lock` (confirmed to be the _same physical file_ on the user's
 real Windows filesystem, not a sandbox-only artifact) blocked `git`
 commands on both sides until the user closed any other git-touching
 process and deleted the lock file locally.

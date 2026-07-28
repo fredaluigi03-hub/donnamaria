@@ -8,8 +8,8 @@
 - [ ] Competitor Research — no audit document exists.
 - [x] Wireframe / section structure — homepage order confirmed:
       `Hero → SearchWidget → OutdoorExperience → PoolShowcase →
-      WellnessShowcase → RoomsShowcase → Features → GalleryPreview →
-      Testimonials → LocationContact → Cta`.
+WellnessShowcase → RoomsShowcase → Features → GalleryPreview →
+Testimonials → LocationContact → Cta`.
 - [ ] Content Strategy — no dedicated content/copy document; copy exists
       inline across sections.
 
@@ -49,13 +49,13 @@
       timeouts, but Vercel's own build log — see Deployment below —
       confirms it's clean in the real build too).
 - [~] Stray leftover file: `public/images/hero-sequence/frame-001.webp`
-      — a broken animated-WebP artifact from a failed first attempt at
-      frame extraction (ffmpeg produced one animated file instead of a
-      still sequence). Unused, not referenced anywhere. Could not be
-      deleted from this session's sandbox (filesystem delete permission
-      declined); safe for the user to delete manually
-      (`public/images/hero-sequence/` folder, whole thing) whenever
-      convenient.
+  — a broken animated-WebP artifact from a failed first attempt at
+  frame extraction (ffmpeg produced one animated file instead of a
+  still sequence). Unused, not referenced anywhere. Could not be
+  deleted from this session's sandbox (filesystem delete permission
+  declined); safe for the user to delete manually
+  (`public/images/hero-sequence/` folder, whole thing) whenever
+  convenient.
 
 ---
 

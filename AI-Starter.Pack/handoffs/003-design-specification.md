@@ -31,6 +31,7 @@ Planning/specification complete. Implementation of the Design Specification has 
 ## Decisions Taken
 
 Full detail in `AI-Starter.Pack/memory/decision.md`. Summary:
+
 - The original dark/green palette is retired in favor of the real brand's black/white/red identity.
 - Concept C — "Boutique Precision" (engineered daylight, light background, disciplined red accent, equipment-as-configurator) — chosen over two alternatives, on an explicit scored comparison.
 - Both existing 3D scenes (`Hero3D`, `WeightRoom3D`) are to be **removed**, not recolored; a single new `SpecBadge3D` becomes the only 3D element on the page.
@@ -56,7 +57,7 @@ Full detail in `AI-Starter.Pack/memory/decision.md`. Summary:
 
 `frontend-design` (design-cliché guardrails — directly informed rejecting the original green-on-black palette as a recognizable AI-default look), `ui-ux-pro-max` (attempted; its structured search database is not materialized on disk in this environment, so only its qualitative guidance was available, not its palette/font/GSAP-preset lookups — reported, not silently skipped), `design-system` (three-layer Primitive→Semantic→Component token architecture, applied to the Design Specification's Section 5), Context7 (`/pmndrs/react-three-fiber` — verified `frameloop="demand"` + `invalidate()`; `/websites/tanstack_start_framework_react` and `/react-hook-form/resolvers` in an earlier session for the still-open contact-form work), Playwright (scripted directly via a headless-Chromium Node script — no dedicated "Playwright skill" exists in this environment; used repeatedly to visually verify the Hero, WeightRoom3D, Nutrizionista, and full-page state after every code change).
 
-"Ponytail," asked for across several sessions, was never a tool: it turned out to be the name of **Phase 3** in this starter pack's own `AI-Starter.Pack/CLAUDE.md` workflow ("reuse before creating" — check for an existing component/hook/utility/package before writing anything new). Discovered only when this pack's `CLAUDE.md` was read in full for this handoff. No tool was ever missing; the instruction was consistently followed anyway as a general practice (CLAUDE.md's own "reuse existing components/libraries" rule), just not recognized as *the same* named step until now.
+"Ponytail," asked for across several sessions, was never a tool: it turned out to be the name of **Phase 3** in this starter pack's own `AI-Starter.Pack/CLAUDE.md` workflow ("reuse before creating" — check for an existing component/hook/utility/package before writing anything new). Discovered only when this pack's `CLAUDE.md` was read in full for this handoff. No tool was ever missing; the instruction was consistently followed anyway as a general practice (CLAUDE.md's own "reuse existing components/libraries" rule), just not recognized as _the same_ named step until now.
 
 ## Assets Used
 
@@ -74,7 +75,7 @@ Full detail in `AI-Starter.Pack/memory/decision.md`. Summary:
 
 - Full token re-theme (dark→light) touches every section at once — wide regression surface even though each individual diff is simple.
 - Red-accent discipline (never a fill, always a rare accent) is the single biggest ongoing design risk for Concept C.
-- Concept C's light, whitespace-heavy, photography-forward direction needs *more and better* real photography than the 6 images currently available — flagged as a missing-asset risk, not something to paper over with stock imagery.
+- Concept C's light, whitespace-heavy, photography-forward direction needs _more and better_ real photography than the 6 images currently available — flagged as a missing-asset risk, not something to paper over with stock imagery.
 - The 3D badge's lighting must be rebuilt from scratch for a light background; the existing `Hero3D`/`WeightRoom3D` lighting rigs assume a near-black backdrop and are not reusable as-is.
 
 ## TODO

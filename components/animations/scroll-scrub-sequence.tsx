@@ -120,7 +120,6 @@ export function ScrollScrubSequence({
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     return () => observer.disconnect();
-     
   }, []);
 
   // Preload every frame once. The first frame draws as soon as it's ready
@@ -155,7 +154,6 @@ export function ScrollScrubSequence({
     return () => {
       cancelled = true;
     };
-     
   }, [basePath, frameCount, extension]);
 
   useMotionValueEvent(progress, "change", (latest) => {

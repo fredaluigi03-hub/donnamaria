@@ -10,7 +10,6 @@ Visitors should slowly discover Donna Maria through atmosphere, photography, typ
 
 The website must communicate emotion before information.
 
-
 ---
 
 # The Feeling
@@ -28,7 +27,6 @@ The jacuzzi is already warm.
 Everything feels calm.
 
 The website should recreate this emotional moment.
-
 
 ---
 
@@ -58,7 +56,6 @@ Desire
 
 Booking
 
-
 ---
 
 # Visual Language
@@ -75,7 +72,6 @@ Photography should dominate over text.
 
 Typography should become part of the design.
 
-
 ---
 
 # Luxury Definition
@@ -91,7 +87,6 @@ Fancy gradients
 Huge titles
 
 Animations everywhere
-
 
 Luxury means:
 
@@ -110,7 +105,6 @@ Editorial composition
 Confidence
 
 Restraint
-
 
 ---
 
@@ -131,7 +125,6 @@ Aesop
 Kinfolk Magazine
 
 Minimal Japanese Architecture
-
 
 ---
 
@@ -171,7 +164,6 @@ Over processed photos
 
 Artificial lighting
 
-
 ---
 
 # Motion Direction
@@ -208,7 +200,6 @@ Crazy scroll animations
 
 Flashy transitions
 
-
 ---
 
 # Typography Direction
@@ -226,7 +217,6 @@ Large margins.
 Readable paragraphs.
 
 Never compress text.
-
 
 ---
 
@@ -252,7 +242,6 @@ Editorial blocks
 
 Repeat.
 
-
 ---
 
 # User Experience
@@ -267,7 +256,6 @@ Scrolling should feel relaxing.
 
 Every interaction should reinforce elegance.
 
-
 ---
 
 # Quality Standard
@@ -281,7 +269,6 @@ If not,
 improve it.
 
 Never settle for average.
-
 
 ---
 
