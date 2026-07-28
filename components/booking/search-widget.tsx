@@ -201,7 +201,7 @@ export function SearchWidget({ className }: SearchWidgetProps) {
 
         <form
           onSubmit={handleSubmit}
-          className="border-gold/40 bg-card/95 hover:border-gold/70 flex w-full flex-col overflow-hidden rounded-3xl border shadow-[0_20px_60px_-15px_rgba(184,149,106,0.22)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_25px_70px_-10px_rgba(184,149,106,0.35)]"
+          className="border-gold/40 bg-card/95 hover:border-gold/70 relative z-20 flex w-full flex-col rounded-3xl border shadow-[0_20px_60px_-15px_rgba(184,149,106,0.22)] backdrop-blur-xl transition-all duration-500 hover:shadow-[0_25px_70px_-10px_rgba(184,149,106,0.35)]"
         >
           {/* Gold hairline */}
           <div
