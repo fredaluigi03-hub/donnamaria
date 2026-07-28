@@ -47,9 +47,8 @@ export function GalleryPreview() {
           </div>
           <FadeIn delay={0.1}>
             <Button
-              variant="outline"
               asChild
-              className="rounded-full shadow-sm transition-all hover:shadow-md"
+              className="border-gold/40 hover:shadow-gold/30 rounded-full border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] text-xs font-semibold tracking-widest text-amber-100 uppercase shadow-lg transition-all hover:scale-105"
             >
               <Link href="/galleria">
                 Scopri tutta la galleria
