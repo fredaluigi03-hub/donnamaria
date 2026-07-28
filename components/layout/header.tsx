@@ -41,7 +41,6 @@ export function Header() {
   const mounted = useMounted();
 
   const isHome = pathname === "/";
-  const transparent = isHome && !scrolled && !open;
 
   // While the homepage hero is playing its scroll-scrubbed footage, the header
   // shows the wordmark and nothing else — the nav and the booking button fade
@@ -51,6 +50,15 @@ export function Header() {
   // render and the first paint identical (both "not immersive").
   const heroFootagePlaying =
     isHome && mounted && !shouldReduceMotion && !isMobile && !open && !pastHeroFootage;
+
+  // Chrome stays off for the whole of the footage, not just the first 80px.
+  // Without the `heroFootagePlaying` term the header picked up its ivory
+  // background, blur and bottom border as soon as the visitor started
+  // scrolling — laying an opaque white bar across the top of a full-bleed
+  // film that is supposed to own the screen. Nothing is scrolling *under* the
+  // header during the pin anyway (the hero is fixed in place), so the bar has
+  // nothing to separate and no reason to be there.
+  const transparent = isHome && !open && (!scrolled || heroFootagePlaying);
 
   useClickOutside(roomsMenuRef, () => setRoomsMenuOpen(false), roomsMenuOpen);
 
