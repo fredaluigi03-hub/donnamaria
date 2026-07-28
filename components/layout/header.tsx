@@ -103,7 +103,7 @@ export function Header() {
         ease: "easeOut",
       }}
       className={cn(
-        "sticky top-0 z-40 py-3 transition-all duration-500",
+        "fixed inset-x-0 top-0 z-40 py-3 transition-all duration-500",
         transparent ? "border-transparent bg-transparent" : "bg-transparent",
       )}
     >

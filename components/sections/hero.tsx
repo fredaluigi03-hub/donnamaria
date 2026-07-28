@@ -211,7 +211,7 @@ export function Hero({
     <section
       ref={sectionRef}
       className={cn(
-        "relative -mt-20 overflow-hidden",
+        "relative overflow-hidden",
         isFullscreen
           ? "bg-background sticky top-0 min-h-dvh"
           : "min-h-[65vh] md:min-h-[75vh]",
