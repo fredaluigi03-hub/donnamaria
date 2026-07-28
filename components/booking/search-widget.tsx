@@ -53,31 +53,81 @@ function CustomDatePickerPopover({
   const containerRef = useRef<HTMLDivElement>(null);
   useClickOutside(containerRef, () => setOpen(false), open);
 
+  const initialDate = useMemo(() => {
+    if (value && value.includes("-")) {
+      const parts = value.split("-").map(Number);
+      const y = parts[0] || 2026;
+      const m = parts[1] || 8;
+      return new Date(y, m - 1, 1);
+    }
+    return new Date(2026, 7, 1); // August 2026 default
+  }, [value]);
+
+  const [activeDate, setActiveDate] = useState<Date>(initialDate);
+
+  const year = activeDate.getFullYear();
+  const month = activeDate.getMonth();
+
+  const italianMonths = [
+    "Gennaio",
+    "Febbraio",
+    "Marzo",
+    "Aprile",
+    "Maggio",
+    "Giugno",
+    "Luglio",
+    "Agosto",
+    "Settembre",
+    "Ottobre",
+    "Novembre",
+    "Dicembre",
+  ];
+
+  const shortMonths = [
+    "Gen",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mag",
+    "Giug",
+    "Lug",
+    "Ago",
+    "Set",
+    "Ott",
+    "Nov",
+    "Dic",
+  ];
+
+  const currentMonthTitle = `${italianMonths[month]} ${year}`;
+  const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysArray = Array.from({ length: totalDaysInMonth }, (_, i) => i + 1);
+
+  // Day offset for weekday alignment (0 = Monday, 6 = Sunday)
+  const firstDayWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
+  const emptyPaddingArray = Array.from({ length: firstDayWeekday }, (_, i) => i);
+
+  function prevMonth(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDate(new Date(year, month - 1, 1));
+  }
+
+  function nextMonth(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveDate(new Date(year, month + 1, 1));
+  }
+
   const formattedDisplay = useMemo(() => {
     if (!value) return "Seleziona data";
     const parts = value.split("-");
     if (parts.length < 3) return value;
-    const year = Number(parts[0]);
-    const month = Number(parts[1]);
-    const day = Number(parts[2]);
-    const months = [
-      "Gen",
-      "Feb",
-      "Mar",
-      "Apr",
-      "Mag",
-      "Giug",
-      "Lug",
-      "Ago",
-      "Set",
-      "Ott",
-      "Nov",
-      "Dic",
-    ];
-    return `${day} ${months[(month || 1) - 1]} ${year}`;
+    const y = Number(parts[0]);
+    const m = Number(parts[1]);
+    const d = Number(parts[2]);
+    const monthName = shortMonths[(m || 1) - 1] ?? "Ago";
+    return `${d} ${monthName} ${y}`;
   }, [value]);
-
-  const daysInAugust = Array.from({ length: 31 }, (_, i) => i + 1);
 
   return (
     <div ref={containerRef} className="relative flex-1">
@@ -103,16 +153,18 @@ function CustomDatePickerPopover({
           <div className="border-border/60 mb-4 flex items-center justify-between border-b pb-2">
             <button
               type="button"
-              className="hover:bg-gold/20 text-gold rounded-lg p-1 transition-colors"
+              onClick={prevMonth}
+              className="hover:bg-gold/20 text-gold rounded-lg p-1.5 transition-colors"
             >
               <ChevronLeft className="size-4" />
             </button>
             <span className="font-display text-gold text-sm font-semibold tracking-wide uppercase">
-              Agosto 2026
+              {currentMonthTitle}
             </span>
             <button
               type="button"
-              className="hover:bg-gold/20 text-gold rounded-lg p-1 transition-colors"
+              onClick={nextMonth}
+              className="hover:bg-gold/20 text-gold rounded-lg p-1.5 transition-colors"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -125,8 +177,11 @@ function CustomDatePickerPopover({
           </div>
 
           <div className="grid grid-cols-7 gap-1.5 text-center text-xs">
-            {daysInAugust.map((dayNum) => {
-              const dayStr = `2026-08-${String(dayNum).padStart(2, "0")}`;
+            {emptyPaddingArray.map((_, idx) => (
+              <span key={`pad-${idx}`} />
+            ))}
+            {daysArray.map((dayNum) => {
+              const dayStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNum).padStart(2, "0")}`;
               const isSelected = value === dayStr;
               const isMinDisabled = minDate && dayStr < minDate;
 
@@ -196,7 +251,7 @@ export function SearchWidget({ className }: SearchWidgetProps) {
 
   return (
     <div className={cn("relative mx-auto max-w-5xl", className)}>
-      <Tilt3D className="w-full">
+      <div className="w-full">
         <Glow subtle />
 
         <form
@@ -257,7 +312,7 @@ export function SearchWidget({ className }: SearchWidgetProps) {
             </Button>
           </div>
         </form>
-      </Tilt3D>
+      </div>
 
       {/* AUTOMATED REAL-TIME AVAILABILITY LIVE MODAL */}
       {showLiveModal && (

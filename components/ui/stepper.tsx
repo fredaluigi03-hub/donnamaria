@@ -29,18 +29,22 @@ function Stepper({
   max = 10,
   className,
 }: StepperProps) {
-  function decrement() {
+  function decrement(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     if (value > min) onChange(value - 1);
   }
 
-  function increment() {
+  function increment(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
     if (value < max) onChange(value + 1);
   }
 
   return (
-    <div className={cn("flex items-center justify-between gap-4", className)}>
+    <div className={cn("flex items-center justify-between gap-4 py-1", className)}>
       <div>
-        <p className="text-sm font-medium">{label}</p>
+        <p className="text-foreground text-sm font-semibold">{label}</p>
         {description && <p className="text-muted-foreground text-xs">{description}</p>}
       </div>
 
@@ -50,13 +54,13 @@ function Stepper({
           onClick={decrement}
           disabled={value <= min}
           aria-label={`Diminuisci ${label.toLowerCase()}`}
-          className="border-input hover:enabled:bg-accent flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+          className="border-gold/40 bg-gold/15 text-gold hover:enabled:bg-gold/30 flex size-8 shrink-0 items-center justify-center rounded-full border transition-all hover:enabled:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Minus className="size-3.5" aria-hidden="true" />
         </button>
 
         <span
-          className="w-4 text-center text-sm font-medium tabular-nums"
+          className="text-foreground w-5 text-center text-sm font-bold tabular-nums"
           aria-live="polite"
         >
           {value}
@@ -67,7 +71,7 @@ function Stepper({
           onClick={increment}
           disabled={value >= max}
           aria-label={`Aumenta ${label.toLowerCase()}`}
-          className="border-input hover:enabled:bg-accent flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+          className="border-gold/40 bg-gold/15 text-gold hover:enabled:bg-gold/30 flex size-8 shrink-0 items-center justify-center rounded-full border transition-all hover:enabled:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="size-3.5" aria-hidden="true" />
         </button>
