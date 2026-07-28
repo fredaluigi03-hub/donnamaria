@@ -15,7 +15,31 @@ export function Footer() {
   // document with the same light-and-shade language the sections use instead of
   // a flat rule. Inset, so it never overlaps the content above.
   return (
-    <footer className="border-border/60 bg-secondary/40 border-t shadow-[inset_0_14px_28px_-18px_rgba(24,20,16,0.22)]">
+    <footer className="border-border/60 bg-secondary/40 relative isolate overflow-hidden border-t shadow-[inset_0_14px_28px_-18px_rgba(24,20,16,0.22)]">
+      {/* Champagne wash rising from the bottom edge — the page closes on the
+          brand's own warm light instead of fading into flat grey. Same accent
+          as the hero kicker rules, the amenity cards and the room rails, so
+          the last thing on screen still belongs to the same palette. Sits
+          behind the content and never darkens the type: the deepest stop is
+          well under the contrast floor for the muted text above it. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-[70%]"
+        style={{
+          background:
+            "linear-gradient(to top, rgba(184,149,106,0.26) 0%, rgba(184,149,106,0.12) 38%, rgba(184,149,106,0.04) 68%, transparent 100%)",
+        }}
+      />
+      {/* A soft bloom in the lower-left corner gives the wash a source rather
+          than letting it read as a flat band of colour. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 -left-16 -z-10 h-72 w-[42rem] rounded-full opacity-50 blur-3xl"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(184,149,106,0.34) 0%, transparent 70%)",
+        }}
+      />
       <Container className="py-16 md:py-20">
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-4">
           <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">

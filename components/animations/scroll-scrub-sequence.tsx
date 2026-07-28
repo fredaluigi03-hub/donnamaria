@@ -43,6 +43,10 @@ export function ScrollScrubSequence({
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const frameRef = useRef(0);
   const sizeRef = useRef({ width: 0, height: 0 });
+  // Lets the preload effect re-trigger the sizing effect's `resize()` once the
+  // first frame has loaded and the source resolution is finally knowable.
+  const resizeRef = useRef<(() => void) | null>(null);
+  const sizedToSourceRef = useRef(false);
 
   const draw = (index: number) => {
     const canvas = canvasRef.current;
@@ -79,32 +83,44 @@ export function ScrollScrubSequence({
     );
   };
 
-  // Keep the canvas's pixel buffer matched to its displayed size — at 1x,
-  // deliberately *not* multiplied by devicePixelRatio. The source frames
-  // are photographic stills capped at ~1280px wide; on a 2x/3x-DPR screen,
-  // sizing the canvas buffer to match the panel's real pixel density would
-  // just make the browser stretch that same limited source further,
-  // compounding the softness instead of adding any real sharpness — there's
-  // no extra detail in the source to resolve at a higher buffer size. 1x
-  // plus `imageSmoothingQuality: "high"` below is the sharper result for
-  // this specific case (a low-res source stretched to fill the viewport).
+  // Canvas buffer resolution, scaled by DPR but capped by how much detail the
+  // source frames actually hold.
+  //
+  // Rendering at a flat 1x used to be right, when the frames were ~1136px
+  // wide: a retina-sized buffer would only have stretched that same limited
+  // source further. The frames now come off a 4K master at 1920px, so a flat
+  // 1x throws real detail away — on a 2x screen the browser upscales the whole
+  // canvas, softening a source that had the pixels to be sharp.
+  //
+  // Asking for full DPR would be just as wrong in the other direction: a 2x
+  // buffer on a 1425px panel wants ~3200px of source across, and there are
+  // only 1920. So take the smaller of the two — never more than the display
+  // can show, never more than the frames can supply.
+  const bufferScaleFor = (cssWidth: number, sourceWidth: number) => {
+    if (!cssWidth || !sourceWidth) return 1;
+    return Math.min(window.devicePixelRatio || 1, Math.max(1, sourceWidth / cssWidth));
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.round(rect.width);
-      canvas.height = Math.round(rect.height);
+      const source = imagesRef.current.find((i) => i?.naturalWidth)?.naturalWidth ?? 0;
+      const scale = bufferScaleFor(rect.width, source);
+      canvas.width = Math.round(rect.width * scale);
+      canvas.height = Math.round(rect.height * scale);
       sizeRef.current = { width: canvas.width, height: canvas.height };
       draw(frameRef.current);
     };
+    resizeRef.current = resize;
     resize();
 
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   // Preload every frame once. The first frame draws as soon as it's ready
@@ -123,6 +139,13 @@ export function ScrollScrubSequence({
       img.src = `${basePath}-${String(i + 1).padStart(3, "0")}.${extension}`;
       img.onload = () => {
         if (cancelled) return;
+        // The very first frame to arrive is what tells us the source
+        // resolution, and the buffer was sized before any of them existed —
+        // so re-run the sizing now that there's something to measure.
+        if (!sizedToSourceRef.current) {
+          sizedToSourceRef.current = true;
+          resizeRef.current?.();
+        }
         if (i === frameRef.current) draw(i);
       };
       images.push(img);
@@ -132,7 +155,7 @@ export function ScrollScrubSequence({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [basePath, frameCount, extension]);
 
   useMotionValueEvent(progress, "change", (latest) => {

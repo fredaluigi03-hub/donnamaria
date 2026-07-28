@@ -37,7 +37,7 @@ export interface HeroCta {
 // unhurried, so the footage reads as a camera move the visitor is driving
 // rather than a flipbook. Raise it to slow the scrub further, lower it to
 // speed up; the hold and the copy timing below follow automatically.
-export const SCRUB_TRACK_VH = 285;
+export const SCRUB_TRACK_VH = 240;
 
 // `scrollYProgress` only reaches 1 once the track's *bottom* hits the viewport
 // top, but the sticky hero unpins a full viewport earlier — so the pin is
@@ -48,7 +48,7 @@ const PINNED_END = (SCRUB_TRACK_VH - 100) / SCRUB_TRACK_VH;
 // Fraction of the pinned stretch spent scrubbing frames; the rest is the hold
 // on the final pool frame. Kept as a fraction of PINNED_END so lengthening the
 // track slows the scrub without eating into the hold.
-const SCRUB_END = PINNED_END * 0.715;
+const SCRUB_END = PINNED_END * 0.72;
 
 /**
  * Viewport heights of scrolling after which the footage has finished playing.
