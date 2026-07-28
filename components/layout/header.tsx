@@ -9,7 +9,7 @@ import { ChevronDown, Menu, X } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import { HERO_IMMERSIVE_VH } from "@/components/sections/hero";
+import { HERO_FOOTAGE_END_VH } from "@/components/sections/hero";
 import { mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { rooms } from "@/config/rooms";
@@ -76,11 +76,13 @@ export function Header() {
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 80);
-      // HERO_IMMERSIVE_VH is how far the pinned hero travels before releasing,
-      // imported rather than hardcoded so retiming the scrub can't leave the
-      // nav hidden past the end of the footage (or reappearing over it).
+      // The threshold is the moment the footage *stops*, not the moment the
+      // hero unpins — the hero holds its last frame for a while after the film
+      // ends, and waiting for the unpin left the nav missing for a few hundred
+      // pixels of finished, motionless picture. Imported rather than hardcoded
+      // so retiming the scrub keeps the nav and the hero copy in step.
       setPastHeroFootage(
-        window.scrollY >= (HERO_IMMERSIVE_VH / 100) * window.innerHeight,
+        window.scrollY >= (HERO_FOOTAGE_END_VH / 100) * window.innerHeight,
       );
     }
     onScroll();

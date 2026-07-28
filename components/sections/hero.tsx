@@ -39,13 +39,27 @@ export interface HeroCta {
 // speed up; the hold and the copy timing below follow automatically.
 export const SCRUB_TRACK_VH = 285;
 
+// `scrollYProgress` only reaches 1 once the track's *bottom* hits the viewport
+// top, but the sticky hero unpins a full viewport earlier — so the pin is
+// already gone by this fraction. Nothing meant to happen "while held" may be
+// scheduled past it.
+const PINNED_END = (SCRUB_TRACK_VH - 100) / SCRUB_TRACK_VH;
+
+// Fraction of the pinned stretch spent scrubbing frames; the rest is the hold
+// on the final pool frame. Kept as a fraction of PINNED_END so lengthening the
+// track slows the scrub without eating into the hold.
+const SCRUB_END = PINNED_END * 0.715;
+
 /**
- * Viewport heights of scrolling the pinned hero costs before it releases —
- * i.e. how long the footage owns the screen. Exported so the Header can dim
- * its nav for exactly that stretch without duplicating the number; see
- * components/layout/header.tsx.
+ * Viewport heights of scrolling after which the footage has finished playing.
+ *
+ * This is the moment the page is "handed back" to the visitor — the copy
+ * appears and the Header brings its nav back. Deliberately the end of the
+ * *scrub*, not the end of the pin: the hero stays pinned for a while longer
+ * holding the last frame, and waiting for that meant the nav reappeared a
+ * few hundred pixels after the film had already stopped.
  */
-export const HERO_IMMERSIVE_VH = SCRUB_TRACK_VH - 100;
+export const HERO_FOOTAGE_END_VH = SCRUB_END * SCRUB_TRACK_VH;
 
 export interface HeroProps {
   title: string;
@@ -132,19 +146,6 @@ export function Hero({
   // top of each other. Scroll up and the same track plays it back in
   // reverse before handing control back to normal scrolling.
   const isPinned = showScrub;
-  // `scrollYProgress` only reaches 1 once the track's *bottom* hits the
-  // viewport top, but the sticky hero unpins a full viewport earlier than
-  // that — so the pin is already gone by this fraction of the progress
-  // range. Everything below must stay under it: anything scheduled past
-  // PINNED_END happens while the hero is scrolling away, not while it's held.
-  const PINNED_END = (SCRUB_TRACK_VH - 100) / SCRUB_TRACK_VH;
-  // Scrub through the frames over the first ~71% of the pinned stretch. The
-  // rest is a deliberate hold: the last frame (the wide, calm pool) sits
-  // still, fully visible, with the headline and CTA back on top of it — the
-  // arrival is meant to be lingered on, not scrolled straight past into the
-  // next section. Expressed as a fraction of PINNED_END so lengthening the
-  // track slows the scrub without eating into the hold.
-  const SCRUB_END = PINNED_END * 0.715;
 
   const { scrollYProgress } = useScroll({
     target: isPinned ? pinRef : sectionRef,
@@ -171,7 +172,11 @@ export function Hero({
   // retiming the track can't accidentally slide the copy back on top of a
   // still-running scrub — which is exactly what an earlier `SCRUB_END * 0.8`
   // stop did: the text faded in over the last fifth of the footage.
-  const TEXT_IN = SCRUB_END + (PINNED_END - SCRUB_END) * 0.25;
+  // Just past SCRUB_END — enough of a gap to read as a fade rather than a
+  // pop, but no waiting. It used to sit a quarter of the way into the hold,
+  // which left the visitor looking at a finished, motionless frame for a few
+  // hundred pixels before anything arrived.
+  const TEXT_IN = SCRUB_END + (PINNED_END - SCRUB_END) * 0.08;
   // Starts at 0, not 1: while the footage plays, the screen carries only the
   // logo and the scroll cue. The headline, subtitle and CTAs arrive as the
   // reward once the sequence lands on the pool. The non-pinned fallback
