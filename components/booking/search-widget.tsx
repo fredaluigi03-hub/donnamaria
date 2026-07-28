@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Calendar as CalendarIcon,
@@ -11,12 +11,15 @@ import {
   X,
   BedDouble,
   ShieldCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Glow } from "@/components/ui/glow";
 import { GuestPicker, type GuestCounts } from "@/components/booking/guest-picker";
 import { Tilt3D } from "@/components/animations/tilt-3d";
+import { useClickOutside } from "@/hooks/use-click-outside";
 import { cn } from "@/lib/utils";
 
 export interface SearchWidgetProps {
@@ -26,7 +29,6 @@ export interface SearchWidgetProps {
 // Sample live availability data per day of current month for automatic instant calculation
 const daysInMonth = Array.from({ length: 31 }, (_, i) => {
   const day = i + 1;
-  // Days 4, 12, 13, 21 are occupied; rest available or limited
   if ([4, 12, 13, 21].includes(day)) {
     return { day, status: "occupied", label: "Occupato" };
   }
@@ -35,6 +37,138 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => {
   }
   return { day, status: "available", label: "Disponibile" };
 });
+
+function CustomDatePickerPopover({
+  label,
+  value,
+  onChange,
+  minDate,
+}: {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  minDate?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickOutside(containerRef, () => setOpen(false), open);
+
+  const formattedDisplay = useMemo(() => {
+    if (!value) return "Seleziona data";
+    const parts = value.split("-");
+    if (parts.length < 3) return value;
+    const year = Number(parts[0]);
+    const month = Number(parts[1]);
+    const day = Number(parts[2]);
+    const months = [
+      "Gen",
+      "Feb",
+      "Mar",
+      "Apr",
+      "Mag",
+      "Giug",
+      "Lug",
+      "Ago",
+      "Set",
+      "Ott",
+      "Nov",
+      "Dic",
+    ];
+    return `${day} ${months[(month || 1) - 1]} ${year}`;
+  }, [value]);
+
+  const daysInAugust = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  return (
+    <div ref={containerRef} className="relative flex-1">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={cn(
+          "hover:bg-gold/10 hover:border-gold/30 flex h-16 w-full cursor-pointer flex-col justify-center gap-0.5 rounded-2xl border px-5 text-left transition-all",
+          open
+            ? "border-gold/60 bg-gold/10 shadow-gold/10 shadow-lg"
+            : "border-transparent",
+        )}
+      >
+        <span className="text-gold flex items-center gap-1.5 text-[0.65rem] font-semibold tracking-[0.2em] uppercase">
+          <CalendarIcon className="size-3" />
+          {label}
+        </span>
+        <span className="text-foreground text-sm font-semibold">{formattedDisplay}</span>
+      </button>
+
+      {open && (
+        <div className="border-gold/40 bg-card/98 text-foreground animate-in fade-in-50 zoom-in-95 absolute top-full left-0 z-50 mt-3 w-80 rounded-2xl border p-5 shadow-2xl backdrop-blur-2xl duration-200">
+          <div className="border-border/60 mb-4 flex items-center justify-between border-b pb-2">
+            <button
+              type="button"
+              className="hover:bg-gold/20 text-gold rounded-lg p-1 transition-colors"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <span className="font-display text-gold text-sm font-semibold tracking-wide uppercase">
+              Agosto 2026
+            </span>
+            <button
+              type="button"
+              className="hover:bg-gold/20 text-gold rounded-lg p-1 transition-colors"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
+
+          <div className="text-gold mb-2 grid grid-cols-7 gap-1 text-center text-xs font-semibold">
+            {["Lu", "Ma", "Me", "Gi", "Ve", "Sa", "Do"].map((d) => (
+              <span key={d}>{d}</span>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1.5 text-center text-xs">
+            {daysInAugust.map((dayNum) => {
+              const dayStr = `2026-08-${String(dayNum).padStart(2, "0")}`;
+              const isSelected = value === dayStr;
+              const isMinDisabled = minDate && dayStr < minDate;
+
+              return (
+                <button
+                  key={dayNum}
+                  type="button"
+                  disabled={Boolean(isMinDisabled)}
+                  onClick={() => {
+                    onChange(dayStr);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex h-8 items-center justify-center rounded-xl font-medium transition-all",
+                    isSelected
+                      ? "bg-gold shadow-gold/40 scale-105 font-bold text-white shadow-md"
+                      : isMinDisabled
+                        ? "text-muted-foreground/40 cursor-not-allowed"
+                        : "hover:bg-gold/20 hover:text-gold text-foreground",
+                  )}
+                >
+                  {dayNum}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="border-border/60 mt-4 flex items-center justify-between border-t pt-3 text-xs">
+            <span className="text-muted-foreground">Donna Maria Suite</span>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="text-gold font-semibold hover:underline"
+            >
+              Conferma
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function SearchWidget({ className }: SearchWidgetProps) {
   const router = useRouter();
@@ -81,39 +215,25 @@ export function SearchWidget({ className }: SearchWidgetProps) {
               Disponibilità
             </span>
 
-            {/* Check-in */}
-            <label className="hover:bg-gold/10 hover:border-gold/30 flex h-16 flex-1 cursor-pointer flex-col justify-center gap-0.5 rounded-2xl border border-transparent px-5 transition-all">
-              <span className="text-gold flex items-center gap-1.5 text-[0.65rem] font-semibold tracking-[0.2em] uppercase">
-                <CalendarIcon className="size-3" />
-                Check-in
-              </span>
-              <input
-                type="date"
-                value={checkIn}
-                onChange={(event) => setCheckIn(event.target.value)}
-                className="text-foreground focus:ring-gold/50 w-full cursor-pointer rounded-md bg-transparent text-sm font-semibold outline-none focus:ring-1"
-              />
-            </label>
+            {/* Check-in Custom Date Picker Popover */}
+            <CustomDatePickerPopover
+              label="Check-in"
+              value={checkIn}
+              onChange={setCheckIn}
+            />
 
             <div
               className="bg-border/80 hidden h-9 w-px shrink-0 xl:block"
               aria-hidden="true"
             />
 
-            {/* Check-out */}
-            <label className="hover:bg-gold/10 hover:border-gold/30 flex h-16 flex-1 cursor-pointer flex-col justify-center gap-0.5 rounded-2xl border border-transparent px-5 transition-all">
-              <span className="text-gold flex items-center gap-1.5 text-[0.65rem] font-semibold tracking-[0.2em] uppercase">
-                <CalendarIcon className="size-3" />
-                Check-out
-              </span>
-              <input
-                type="date"
-                value={checkOut}
-                min={checkIn || undefined}
-                onChange={(event) => setCheckOut(event.target.value)}
-                className="text-foreground focus:ring-gold/50 w-full cursor-pointer rounded-md bg-transparent text-sm font-semibold outline-none focus:ring-1"
-              />
-            </label>
+            {/* Check-out Custom Date Picker Popover */}
+            <CustomDatePickerPopover
+              label="Check-out"
+              value={checkOut}
+              minDate={checkIn}
+              onChange={setCheckOut}
+            />
 
             <div
               className="bg-border/80 hidden h-9 w-px shrink-0 xl:block"
