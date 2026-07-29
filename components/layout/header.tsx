@@ -5,7 +5,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Menu, User, X } from "lucide-react";
+import { getCurrentUser, type UserProfile } from "@/lib/auth-store";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -73,14 +74,20 @@ export function Header() {
     closeTimeoutRef.current = setTimeout(() => setRoomsMenuOpen(false), 150);
   }
 
+  const [user, setUser] = useState<UserProfile | null>(() => getCurrentUser());
+
+  useEffect(() => {
+    function syncAuth() {
+      setUser(getCurrentUser());
+    }
+    syncAuth();
+    window.addEventListener("donnamaria_auth_state_changed", syncAuth);
+    return () => window.removeEventListener("donnamaria_auth_state_changed", syncAuth);
+  }, []);
+
   useEffect(() => {
     function onScroll() {
       setScrolled(window.scrollY > 80);
-      // The threshold is the moment the footage *stops*, not the moment the
-      // hero unpins — the hero holds its last frame for a while after the film
-      // ends, and waiting for the unpin left the nav missing for a few hundred
-      // pixels of finished, motionless picture. Imported rather than hardcoded
-      // so retiming the scrub keeps the nav and the hero copy in step.
       setPastHeroFootage(
         window.scrollY >= (HERO_FOOTAGE_END_VH / 100) * window.innerHeight,
       );
@@ -244,10 +251,23 @@ export function Header() {
 
           <div
             className={cn(
-              "hidden items-center gap-2 transition-all duration-500 md:flex",
+              "hidden items-center gap-3 transition-all duration-500 md:flex",
               showNav ? "visible opacity-100" : "invisible opacity-0",
             )}
           >
+            <Link
+              href="/account"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-semibold tracking-wider uppercase transition-all",
+                scrolled
+                  ? "border-gold/40 hover:bg-gold/10 text-neutral-900"
+                  : "border-white/40 bg-black/30 text-white hover:bg-black/50",
+              )}
+            >
+              <User className="text-gold size-3.5" />
+              <span>{user ? user.name.split(" ")[0] : "Account"}</span>
+            </Link>
+
             <Button
               asChild
               className={cn(
@@ -285,7 +305,16 @@ export function Header() {
         )}
       >
         <div className="min-h-0">
-          <Container className="flex flex-col gap-1 pb-6">
+          <Container className="flex flex-col gap-1 pt-2 pb-6">
+            <Link
+              href="/account"
+              className="text-gold flex items-center gap-2 rounded-md px-2 py-2.5 text-sm font-semibold"
+              onClick={() => setOpen(false)}
+            >
+              <User className="size-4" />
+              <span>{user ? `Account (${user.name})` : "Area Ospiti / Account"}</span>
+            </Link>
+
             {mainNav.map((item) => (
               <Link
                 key={item.href}
