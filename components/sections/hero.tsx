@@ -129,7 +129,7 @@ export function Hero({
   const hasMotionBackground = !!scrubFrames || !!videoSrc;
   const showScrub =
     isFullscreen && !!scrubFrames && mounted && !shouldReduceMotion && !isMobile;
-  const showVideo = !scrubFrames && !!videoSrc && mounted && !shouldReduceMotion;
+  const showVideo = !!videoSrc && mounted && !shouldReduceMotion && !showScrub;
   const showKenBurns = mounted && !shouldReduceMotion && !showScrub && !showVideo;
 
   // When the frame sequence is actually driving the background, the hero

@@ -61,6 +61,7 @@ export default function LaStrutturaPage() {
         title="Donna Maria: la nostra idea di ospitalità"
         imageSrc="/images/pool/hero.png"
         imageAlt="Piscina e area relax esterna di Donna Maria Suite & Relax"
+        videoSrc="/videos/pool-dinamic.mp4"
       />
 
       <Section>
