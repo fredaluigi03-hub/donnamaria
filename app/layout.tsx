@@ -9,6 +9,8 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 
+import { LoadingScreen } from "@/components/animations/loading-screen";
+
 import "lenis/dist/lenis.css";
 import "./globals.css";
 
@@ -27,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it" suppressHydrationWarning>
       <body className={cn(fontSans.variable, fontDisplay.variable, "font-sans")}>
         <ThemeProvider>
+          <LoadingScreen />
           <AmbientBackdrop />
           <SmoothScroll>
             <div className="flex min-h-dvh flex-col">
