@@ -133,28 +133,132 @@ export function updateReservationStatus(id: string, status: Reservation["status"
   saveReservations(updated);
 }
 
+export function updateReservation(id: string, data: Partial<Reservation>): void {
+  const current = getReservations();
+  const updated = current.map((res) => (res.id === id ? { ...res, ...data } : res));
+  saveReservations(updated);
+}
+
 export function deleteReservation(id: string): void {
   const current = getReservations();
   const updated = current.filter((res) => res.id !== id);
   saveReservations(updated);
 }
 
-/** Check if a specific date (YYYY-MM-DD) for a given room is occupied or blocked */
-export function getRoomDateStatus(
-  roomSlug: string,
+export function toggleRoomDateBlock(
+  roomSlug: "suite-francy" | "domi" | "mery",
+  roomName: string,
   dateStr: string,
-): { isOccupied: boolean; status?: Reservation["status"]; reservation?: Reservation } {
-  const reservations = getReservations();
-  const targetDate = new Date(dateStr).getTime();
+): void {
+  const current = getReservations();
+  const targetTime = new Date(dateStr).getTime();
 
-  for (const res of reservations) {
-    if (res.roomSlug !== roomSlug || res.status === "cancelled") continue;
+  // Next day for checkout
+  const nextDate = new Date(dateStr);
+  nextDate.setDate(nextDate.getDate() + 1);
+  const nextDateStr = nextDate.toISOString().split("T")[0]!;
+
+  const existingBlockIndex = current.findIndex((res) => {
+    if (res.roomSlug !== roomSlug || res.status !== "blocked") return false;
     const start = new Date(res.checkIn).getTime();
     const end = new Date(res.checkOut).getTime();
-    if (targetDate >= start && targetDate < end) {
-      return { isOccupied: true, status: res.status, reservation: res };
-    }
-  }
+    return targetTime >= start && targetTime < end;
+  });
 
-  return { isOccupied: false };
+  if (existingBlockIndex >= 0) {
+    // Unblock if already blocked
+    current.splice(existingBlockIndex, 1);
+    saveReservations([...current]);
+  } else {
+    // Block the date
+    addReservation({
+      customerName: "Blocco Admin Manuale",
+      email: "admin@donnamaria.it",
+      phone: "+39 0825 000000",
+      roomSlug,
+      roomName,
+      checkIn: dateStr,
+      checkOut: nextDateStr,
+      adults: 0,
+      children: 0,
+      status: "blocked",
+      totalPrice: 0,
+      notes: "Bloccata da gestione calendario",
+    });
+  }
+}
+
+// ----------------------------------------------------
+// ROOM PRICES & SITE SETTINGS
+// ----------------------------------------------------
+export interface RoomPrices {
+  "suite-francy": number;
+  domi: number;
+  mery: number;
+}
+
+const ROOM_PRICES_KEY = "donnamaria_admin_room_prices_v1";
+
+export const initialRoomPrices: RoomPrices = {
+  "suite-francy": 160,
+  domi: 140,
+  mery: 130,
+};
+
+export function getRoomPrices(): RoomPrices {
+  if (typeof window === "undefined") return initialRoomPrices;
+  try {
+    const data = localStorage.getItem(ROOM_PRICES_KEY);
+    return data ? JSON.parse(data) : initialRoomPrices;
+  } catch {
+    return initialRoomPrices;
+  }
+}
+
+export function saveRoomPrices(prices: RoomPrices): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(ROOM_PRICES_KEY, JSON.stringify(prices));
+    window.dispatchEvent(new Event("donnamaria_prices_updated"));
+  } catch (err) {
+    console.error("Failed to save room prices:", err);
+  }
+}
+
+export interface AdminSiteSettings {
+  phone: string;
+  email: string;
+  checkInTime: string;
+  checkOutTime: string;
+  address: string;
+}
+
+const SITE_SETTINGS_KEY = "donnamaria_admin_site_settings_v1";
+
+export const initialSiteSettings: AdminSiteSettings = {
+  phone: "+39 347 1234567",
+  email: "info@donnamariasuiterelax.it",
+  checkInTime: "15:00 - 20:00",
+  checkOutTime: "08:00 - 10:30",
+  address: "Via Tenente Paolo de Vivo, 10 - 83028 Serino (AV)",
+};
+
+export function getSiteSettings(): AdminSiteSettings {
+  if (typeof window === "undefined") return initialSiteSettings;
+  try {
+    const data = localStorage.getItem(SITE_SETTINGS_KEY);
+    return data ? JSON.parse(data) : initialSiteSettings;
+  } catch {
+    return initialSiteSettings;
+  }
+}
+
+export function saveSiteSettings(settings: AdminSiteSettings): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(SITE_SETTINGS_KEY, JSON.stringify(settings));
+    window.dispatchEvent(new Event("donnamaria_settings_updated"));
+  } catch (err) {
+    console.error("Failed to save site settings:", err);
+  }
 }
