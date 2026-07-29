@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
+import Image from "next/image";
+
 import { useMounted } from "@/hooks/use-mounted";
 
 export interface LoadingScreenProps {
@@ -81,26 +83,21 @@ export function LoadingScreen({
           </div>
 
           <div className="relative z-10 flex w-full max-w-md flex-col items-center text-center">
-            {/* Logo Emblem Icon */}
+            {/* Logo Official Image */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="border-gold/40 bg-gold/15 text-gold mb-6 flex size-16 items-center justify-center rounded-2xl border shadow-[0_0_30px_rgba(212,175,55,0.25)] backdrop-blur-md"
+              className="border-gold/40 bg-gold/15 shadow-gold/30 mb-6 flex size-24 items-center justify-center rounded-3xl border p-3 shadow-2xl backdrop-blur-xl"
             >
-              <svg
-                className="size-8 text-[#d4af37]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
+              <Image
+                src="/images/logo.png"
+                alt="Donna Maria Suite & Relax"
+                width={80}
+                height={80}
+                priority
+                className="size-20 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+              />
             </motion.div>
 
             {/* Brand Title */}
