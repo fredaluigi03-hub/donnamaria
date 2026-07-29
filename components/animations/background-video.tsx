@@ -41,6 +41,12 @@ export function BackgroundVideo({ src, poster, className }: BackgroundVideoProps
 
     videoA.muted = true;
     videoB.muted = true;
+    videoA.setAttribute("playsinline", "true");
+    videoA.setAttribute("webkit-playsinline", "true");
+    videoB.setAttribute("playsinline", "true");
+    videoB.setAttribute("webkit-playsinline", "true");
+
+    videoA.play().catch(() => {});
     videoB.pause();
     videoB.currentTime = 0;
 

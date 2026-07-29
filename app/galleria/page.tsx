@@ -21,6 +21,7 @@ export default function GalleriaPage() {
         title="Ogni angolo, raccontato per immagini"
         imageSrc="/images/pool/hero.png"
         imageAlt="Piscina panoramica di Donna Maria Suite & Relax"
+        videoSrc="/videos/pool-dinamic.mp4"
       />
 
       <Section>

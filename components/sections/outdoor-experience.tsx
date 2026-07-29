@@ -43,8 +43,8 @@ export function OutdoorExperience() {
   // directly would make the server and the client's first paint disagree
   // on the DOM tree. `useMounted()` is false on both, so video/Ken-Burns
   // only ever appear in a safe, post-hydration render.
-  const showVideo = mounted && !shouldReduceMotion && !isMobile;
-  const showKenBurns = mounted && !shouldReduceMotion && isMobile;
+  const showVideo = mounted && !shouldReduceMotion;
+  const showKenBurns = false;
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,

@@ -129,15 +129,8 @@ export function Hero({
   const hasMotionBackground = !!scrubFrames || !!videoSrc;
   const showScrub =
     isFullscreen && !!scrubFrames && mounted && !shouldReduceMotion && !isMobile;
-  const showVideo =
-    isFullscreen &&
-    !scrubFrames &&
-    !!videoSrc &&
-    mounted &&
-    !shouldReduceMotion &&
-    !isMobile;
-  const showKenBurns =
-    isFullscreen && mounted && !shouldReduceMotion && (isMobile || !hasMotionBackground);
+  const showVideo = !scrubFrames && !!videoSrc && mounted && !shouldReduceMotion;
+  const showKenBurns = mounted && !shouldReduceMotion && !showScrub && !showVideo;
 
   // When the frame sequence is actually driving the background, the hero
   // pins in place for an extra stretch of scroll (`SCRUB_TRACK_VH`) instead
