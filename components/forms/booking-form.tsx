@@ -14,6 +14,7 @@ import { Select } from "@/components/ui/select";
 import { GuestPicker } from "@/components/booking/guest-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 import { rooms } from "@/config/rooms";
+import { addReservation } from "@/lib/admin-store";
 
 /**
  * "Richiesta di disponibilità" — same pattern as contact-form.tsx (React
@@ -53,11 +54,27 @@ export function BookingForm() {
 
   async function onSubmit(values: BookingFormValues) {
     try {
-      // Replace with a real Server Action or Route Handler + Supabase insert.
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Richiesta di disponibilità:", values);
-      }
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      const roomObj = rooms.find((r) => r.slug === values.room);
+      const roomSlug =
+        (values.room as "suite-francy" | "domi" | "mery") || "suite-francy";
+
+      addReservation({
+        customerName: values.name,
+        email: values.email,
+        phone: values.phone,
+        roomSlug,
+        roomName: roomObj?.name ?? "Donna Maria Suite",
+        checkIn: values.checkIn || "2026-08-15",
+        checkOut: values.checkOut || "2026-08-18",
+        adults: values.adults,
+        children: values.children,
+        status: "pending",
+        totalPrice: roomSlug === "suite-francy" ? 480 : roomSlug === "domi" ? 380 : 320,
+        notes: values.message,
+      });
+
       setStatus("success");
       reset();
     } catch {

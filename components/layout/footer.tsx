@@ -138,17 +138,23 @@ export function Footer() {
           <p className="text-muted-foreground text-sm">
             © {year} {siteConfig.name}. Tutti i diritti riservati.
           </p>
-          <nav className="flex flex-wrap gap-x-6 gap-y-2">
+          <div className="flex flex-wrap items-center gap-6 text-sm">
             {footerNav.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-muted-foreground hover:text-foreground text-sm transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {item.label}
               </Link>
             ))}
-          </nav>
+            <Link
+              href="/admin"
+              className="text-gold/90 hover:text-gold font-medium transition-colors"
+            >
+              Area Riservata (Admin)
+            </Link>
+          </div>
         </div>
       </Container>
     </footer>
