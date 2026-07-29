@@ -28,6 +28,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
       attribute="class"
       forcedTheme="light"
       enableSystem={false}
+      enableColorScheme={false}
       disableTransitionOnChange
       {...props}
     >

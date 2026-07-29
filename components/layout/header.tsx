@@ -74,16 +74,18 @@ export function Header() {
     closeTimeoutRef.current = setTimeout(() => setRoomsMenuOpen(false), 150);
   }
 
-  const [user, setUser] = useState<UserProfile | null>(() => getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   useEffect(() => {
     function syncAuth() {
-      setUser(getCurrentUser());
+      setCurrentUser(getCurrentUser());
     }
     syncAuth();
     window.addEventListener("donnamaria_auth_state_changed", syncAuth);
     return () => window.removeEventListener("donnamaria_auth_state_changed", syncAuth);
   }, []);
+
+  const user = mounted ? currentUser : null;
 
   useEffect(() => {
     function onScroll() {
