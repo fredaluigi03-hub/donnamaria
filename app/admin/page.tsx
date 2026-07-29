@@ -23,7 +23,6 @@ import {
   Edit,
   Settings,
   Tag,
-  Info,
 } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -40,6 +39,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { rooms } from "@/config/rooms";
+import { useMounted } from "@/hooks/use-mounted";
 import {
   ADMIN_CREDENTIALS,
   addReservation,
@@ -74,6 +74,7 @@ const italianMonths = [
 ];
 
 export default function AdminPage() {
+  const mounted = useMounted();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("donnamaria_admin_auth") === "true";
@@ -270,10 +271,12 @@ export default function AdminPage() {
     return matchesFilter && matchesSearch;
   });
 
+  const authed = mounted && isAuthenticated;
+
   // ----------------------------------------------------
   // LOGIN SCREEN
   // ----------------------------------------------------
-  if (!isAuthenticated) {
+  if (!authed) {
     return (
       <Section className="relative min-h-[85vh] py-20">
         <Container className="flex max-w-md flex-col items-center justify-center">
