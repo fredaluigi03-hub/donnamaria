@@ -38,11 +38,11 @@ export function setCurrentUser(user: UserProfile | null): void {
 }
 
 export async function loginWithOAuth(provider: "google" | "apple"): Promise<UserProfile> {
-  const supabase = createClient();
-
   // Try real Supabase OAuth if configured
   try {
+    const supabase = createClient();
     if (
+      supabase &&
       process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     ) {
@@ -94,7 +94,9 @@ export function logoutUser(): void {
   setCurrentUser(null);
   try {
     const supabase = createClient();
-    supabase.auth.signOut().catch(() => {});
+    if (supabase) {
+      supabase.auth.signOut().catch(() => {});
+    }
   } catch {}
 }
 

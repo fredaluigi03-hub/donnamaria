@@ -9,8 +9,12 @@ import { requireEnv } from "@/lib/env";
  * across the server/browser boundary.
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-  );
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    return null;
+  }
+
+  return createBrowserClient<Database>(url, key);
 }

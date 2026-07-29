@@ -19,3 +19,11 @@ export function requireEnv(key: string): string {
 
   return value;
 }
+
+export function hasEnv(key: string): boolean {
+  return typeof process.env[key] === "string" && process.env[key]!.trim().length > 0;
+}
+
+export function getOptionalEnv(key: string): string | undefined {
+  return process.env[key];
+}
