@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { TextReveal } from "@/components/animations/text-reveal";
 import { FadeIn } from "@/components/animations/fade-in";
 import { BackgroundVideo } from "@/components/animations/background-video";
+import { AiTag } from "@/components/ui/ai-disclosure";
 import { ScrollScrubSequence } from "@/components/animations/scroll-scrub-sequence";
 import { useMounted } from "@/hooks/use-mounted";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -290,6 +291,10 @@ export function Hero({
         ) : (
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
         )}
+
+        {/* Sopra l'overlay, sotto la copy: il visitatore sa che la scena è
+            generata prima ancora di scorrere. */}
+        <AiTag className="right-4 bottom-4 sm:right-6 sm:bottom-6" />
 
         {isFullscreen ? (
           <motion.div

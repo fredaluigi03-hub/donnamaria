@@ -30,6 +30,7 @@ export interface LightboxGridProps {
  * /galleria page rather than duplicating the grid+lightbox markup twice.
  */
 import { Tilt3D } from "@/components/animations/tilt-3d";
+import { AiTag } from "@/components/ui/ai-disclosure";
 import { Sparkles, Maximize2 } from "lucide-react";
 
 export function LightboxGrid({ images, className }: LightboxGridProps) {
@@ -92,6 +93,8 @@ export function LightboxGrid({ images, className }: LightboxGridProps) {
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-90" />
 
+                    <AiTag className="top-4 left-4" />
+
                     {/* Hover expand badge */}
                     <div className="group-hover:border-gold group-hover:bg-gold absolute top-4 right-4 flex size-9 items-center justify-center rounded-full border border-white/30 bg-black/50 text-white backdrop-blur-md transition-all duration-300 group-hover:scale-110 group-hover:text-black">
                       <Maximize2 className="size-4" />
@@ -146,6 +149,7 @@ export function LightboxGrid({ images, className }: LightboxGridProps) {
                 sizes="90vw"
                 className="object-contain"
               />
+              <AiTag className="bottom-3 left-3" />
             </div>
           )}
 

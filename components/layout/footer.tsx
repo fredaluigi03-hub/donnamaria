@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
+import { AiDisclosure } from "@/components/ui/ai-disclosure";
 import { footerNav, mainNav } from "@/config/nav";
 import { siteConfig } from "@/config/site";
 import { rooms } from "@/config/rooms";
@@ -135,9 +136,12 @@ export function Footer() {
         </div>
 
         <div className="border-border/60 mt-12 flex flex-col gap-4 border-t pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-muted-foreground text-sm">
-            © {year} {siteConfig.name}. Tutti i diritti riservati.
-          </p>
+          <div className="flex flex-col items-start gap-4">
+            <p className="text-muted-foreground text-sm">
+              © {year} {siteConfig.name}. Tutti i diritti riservati.
+            </p>
+            <AiDisclosure />
+          </div>
           <div className="flex flex-wrap items-center gap-6 text-sm">
             {footerNav.map((item) => (
               <Link

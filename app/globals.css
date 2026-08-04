@@ -246,6 +246,39 @@
 }
 
 @layer utilities {
+  /* Pulsante 3D immersivo — stesso effetto del bottone su Coloradobolt
+     (ridge solida + glow, hover che solleva e ruota, active che affonda),
+     con i soli colori d'ombra riportati sulla palette chiara di questo sito:
+     su #faf8f5 la ridge nera di lì sarebbe uno stacco troppo duro. */
+  .btn-3d {
+    --btn-3d-shadow: rgba(24, 24, 24, 0.28);
+    --btn-3d-glow: rgba(24, 24, 24, 0.14);
+    --btn-3d-shadow-hover: rgba(192, 138, 62, 0.85);
+    --btn-3d-glow-hover: rgba(192, 138, 62, 0.3);
+    --btn-3d-shadow-active: rgba(24, 24, 24, 0.35);
+    --btn-3d-glow-active: rgba(24, 24, 24, 0.12);
+    position: relative;
+    transform-style: preserve-3d;
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s ease;
+    box-shadow:
+      0 6px 0 0 var(--btn-3d-shadow),
+      0 12px 24px var(--btn-3d-glow);
+  }
+  .btn-3d:hover {
+    transform: translateY(-3px) translateZ(10px) rotateX(4deg);
+    box-shadow:
+      0 9px 0 0 var(--btn-3d-shadow-hover),
+      0 18px 32px var(--btn-3d-glow-hover);
+  }
+  .btn-3d:active {
+    transform: translateY(3px) translateZ(0px) rotateX(0deg);
+    box-shadow:
+      0 2px 0 0 var(--btn-3d-shadow-active),
+      0 4px 12px var(--btn-3d-glow-active);
+  }
+
   /* Respect reduced-motion preferences everywhere. Every animation
      primitive in components/animations checks this at the JS level too,
      but this is the CSS-level backstop. */
@@ -258,5 +291,33 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Pannello Trasparenza AI: entrata 200ms.
+   Lo stato VISIBILE è la base e `@starting-style` fornisce solo il punto di
+   partenza dell'animazione. Invertirli (base nascosta + [open] visibile)
+   lascerebbe il pannello invisibile su qualunque browser che non applichi la
+   regola: qui la funzione non dipende mai dall'animazione.
+   Fuori da @layer di proposito: annidato in `@layer utilities` il blocco
+   `@starting-style` viene scartato in build da PostCSS/Tailwind. */
+.ai-dialog {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.ai-dialog::backdrop {
+  opacity: 1;
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+@starting-style {
+  .ai-dialog[open] {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  .ai-dialog[open]::backdrop {
+    opacity: 0;
   }
 }

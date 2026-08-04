@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { AiTag } from "@/components/ui/ai-disclosure";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 export interface CoverflowImage {
@@ -171,10 +172,15 @@ export function RoomGalleryCoverflow({ images, className }: RoomGalleryCoverflow
                 {/* Specular edge: a single hairline of light down the leading
                   edge of the active card, the way a lit surface catches. */}
                 {isActive && (
-                  <div
-                    aria-hidden="true"
-                    className="absolute inset-0 rounded-xl ring-1 ring-white/15 ring-inset"
-                  />
+                  <>
+                    <div
+                      aria-hidden="true"
+                      className="absolute inset-0 rounded-xl ring-1 ring-white/15 ring-inset"
+                    />
+                    {/* Solo sulla carta in primo piano: sulle vicine, sfocate e
+                        ruotate, l'etichetta sarebbe illeggibile. */}
+                    <AiTag className="right-3 bottom-3" />
+                  </>
                 )}
               </motion.button>
             );

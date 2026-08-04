@@ -42,3 +42,21 @@ export const siteConfig = {
   // Nessun profilo social attivo al momento — aggiungere qui quando disponibili.
   links: {},
 } as const;
+
+/**
+ * Testi della disclosure IA — centralizzati qui perché la stessa frase compare
+ * nel badge del footer, nel pannello, sulle etichette dei media e nella scheda
+ * camera: un solo punto da aggiornare se la formulazione legale cambia.
+ */
+export const aiDisclosure = {
+  badge: "Trasparenza AI",
+  tagShort: "Generata con IA",
+  roomNote:
+    "Le immagini di questa camera sono generate con intelligenza artificiale: arredi, luci e proporzioni possono differire dall'ambiente reale.",
+  panelTitle: "Contenuti generati con IA",
+  panelBody: [
+    "Le immagini e i video di questo sito — hero, gallerie delle camere, piscina, area wellness ed esterni — sono generati con intelligenza artificiale. Non sono fotografie reali della struttura.",
+    "La struttura, le camere e i servizi che descriviamo sono invece reali: l'IA riguarda il modo in cui gli ambienti vengono rappresentati, non ciò che offriamo. Arredi, finiture e proporzioni possono quindi differire da quanto troverai al tuo arrivo.",
+    "Lo dichiariamo in modo esplicito come previsto dall'art. 50 del Regolamento UE 2024/1689 sull'intelligenza artificiale, applicabile dal 2 agosto 2026.",
+  ],
+} as const;

@@ -39,6 +39,7 @@ const accentBarClass: Record<Room["accent"], string> = {
  * lands on a page that continues the sentence instead of switching template.
  */
 import { Tilt3D } from "@/components/animations/tilt-3d";
+import { AiRoomNote } from "@/components/ui/ai-disclosure";
 
 const roomDetailThemeConfig: Record<
   Room["accent"],
@@ -174,6 +175,7 @@ export function RoomDetail({ room }: { room: Room }) {
                   <RoomGalleryCoverflow images={room.gallery} />
                 </Tilt3D>
               </FadeIn>
+              <AiRoomNote />
             </div>
           </div>
 

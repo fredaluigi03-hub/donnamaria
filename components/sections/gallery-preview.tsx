@@ -11,6 +11,7 @@ import { RoomGalleryCoverflow } from "@/components/sections/room-gallery-coverfl
 import { galleryImages } from "@/config/gallery";
 
 import { Tilt3D } from "@/components/animations/tilt-3d";
+import { AiTag } from "@/components/ui/ai-disclosure";
 
 const preview = [
   galleryImages.find((image) => image.category === "Suite Francy")!,
@@ -72,6 +73,7 @@ export function GalleryPreview() {
                 className="h-full w-full object-cover"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <AiTag className="top-6 left-6" />
               <div className="absolute right-6 bottom-6 left-6 flex items-center justify-between">
                 <div className="flex flex-col gap-1">
                   <span className="text-gold text-xs font-semibold tracking-widest uppercase">
