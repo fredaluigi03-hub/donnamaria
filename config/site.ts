@@ -50,13 +50,27 @@ export const siteConfig = {
  */
 export const aiDisclosure = {
   badge: "Trasparenza AI",
-  tagShort: "Generata con IA",
+  // "Rielaborata", non "Generata": le immagini partono da fotografie reali
+  // della struttura. Dichiarare più del vero non è prudenza — è dire
+  // all'ospite che il posto che sta guardando non esiste.
+  tagShort: "Rielaborata con IA",
+  /** Pagina pubblica: è la versione linkabile e indicizzabile della dichiarazione. */
+  href: "/trasparenza-ai",
+  // Data fissa, non `new Date()`: serve a dire "questo testo è online da qui",
+  // e una data che si aggiorna da sola ogni build non prova nulla.
+  updatedAt: "2026-08-05",
+  /** Riga sopra il tasto di invio: è lì che l'ospite decide davvero. */
+  formNote:
+    "Prima di inviare: le immagini di questo sito partono da fotografie reali della struttura, rielaborate con IA per angolo, luce e qualità.",
+  /** Ripetuta nella conferma, così resta anche fuori dalla pagina. */
+  confirmationNote:
+    "Ti ricordiamo che le immagini del sito sono fotografie della struttura rielaborate con IA: saremo felici di inviarti scatti non rielaborati della camera prima della conferma.",
   roomNote:
-    "Le immagini di questa camera sono generate con intelligenza artificiale: arredi, luci e proporzioni possono differire dall'ambiente reale.",
-  panelTitle: "Contenuti generati con IA",
+    "Le immagini di questa camera sono fotografie reali rielaborate con intelligenza artificiale: luce, colori e prospettiva possono differire da quanto vedrai dal vivo.",
+  panelTitle: "Trasparenza sulle immagini",
   panelBody: [
-    "Le immagini e i video di questo sito — hero, gallerie delle camere, piscina, area wellness ed esterni — sono generati con intelligenza artificiale. Non sono fotografie reali della struttura.",
-    "La struttura, le camere e i servizi che descriviamo sono invece reali: l'IA riguarda il modo in cui gli ambienti vengono rappresentati, non ciò che offriamo. Arredi, finiture e proporzioni possono quindi differire da quanto troverai al tuo arrivo.",
-    "Lo dichiariamo in modo esplicito come previsto dall'art. 50 del Regolamento UE 2024/1689 sull'intelligenza artificiale, applicabile dal 2 agosto 2026.",
+    "Le immagini e i video di questo sito — hero, gallerie delle camere, piscina, area wellness ed esterni — partono da fotografie reali della struttura, rielaborate con intelligenza artificiale per angolo di ripresa, luce e qualità. Gli ambienti che vedi esistono e sono i nostri.",
+    "L'IA riguarda il modo in cui gli ambienti sono ripresi, non ciò che offriamo. Colori, luce e prospettiva possono quindi differire da quanto vedrai dal vivo.",
+    "Lo dichiariamo in modo esplicito come previsto dall'art. 50 del Regolamento UE 2024/1689 sull'intelligenza artificiale, che riguarda i contenuti generati o manipolati con IA ed è applicabile dal 2 agosto 2026.",
   ],
 } as const;

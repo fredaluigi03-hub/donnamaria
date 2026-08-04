@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Sparkles, X } from "lucide-react";
 
 import { aiDisclosure } from "@/config/site";
@@ -111,6 +112,17 @@ export function AiDisclosure() {
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
+
+          <Link
+            href={aiDisclosure.href}
+            // Il layout (e quindi questo <dialog>) sopravvive alla navigazione
+            // client di Next: senza chiuderlo resterebbe aperto sulla pagina
+            // di destinazione.
+            onClick={(e) => e.currentTarget.closest("dialog")?.close()}
+            className="text-foreground mt-6 inline-block text-xs font-semibold tracking-widest uppercase underline underline-offset-4"
+          >
+            Dichiarazione completa →
+          </Link>
         </div>
       </dialog>
     </>

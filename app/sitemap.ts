@@ -13,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/contatti",
     "/privacy",
     "/terms",
+    "/trasparenza-ai",
   ];
 
   return routes.map((route) => ({

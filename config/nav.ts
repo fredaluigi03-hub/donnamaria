@@ -11,4 +11,5 @@ export const mainNav: NavItem[] = [
 export const footerNav: NavItem[] = [
   { label: "Privacy", href: "/privacy" },
   { label: "Termini", href: "/terms" },
+  { label: "Trasparenza AI", href: "/trasparenza-ai" },
 ];

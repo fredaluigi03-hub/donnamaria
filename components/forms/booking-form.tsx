@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { Select } from "@/components/ui/select";
 import { GuestPicker } from "@/components/booking/guest-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 import { rooms } from "@/config/rooms";
+import { aiDisclosure } from "@/config/site";
 import { addReservation } from "@/lib/admin-store";
 
 /**
@@ -201,6 +203,21 @@ export function BookingForm() {
         <Textarea id="message" rows={4} {...register("message")} />
       </div>
 
+      {/* Sopra il tasto di invio, non nel footer: è qui che l'ospite prende la
+          decisione, ed è al momento della decisione che la dichiarazione conta. */}
+      <p className="text-muted-foreground flex gap-2.5 text-xs leading-relaxed">
+        <Sparkles className="text-warning mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+        <span>
+          {aiDisclosure.formNote}{" "}
+          <Link
+            href={aiDisclosure.href}
+            className="text-foreground underline underline-offset-2"
+          >
+            Dichiarazione completa
+          </Link>
+        </span>
+      </p>
+
       <Button type="submit" size="lg" disabled={isSubmitting} className="self-start">
         {isSubmitting && <Loader2 className="animate-spin" aria-hidden="true" />}
         Invia richiesta
@@ -208,10 +225,15 @@ export function BookingForm() {
 
       <div role="status" aria-live="polite" className="text-sm">
         {status === "success" && (
-          <p className="text-success">
-            Grazie! Abbiamo ricevuto la vostra richiesta — vi risponderemo al più presto
-            per confermare la disponibilità.
-          </p>
+          <div className="flex flex-col gap-2">
+            <p className="text-success">
+              Grazie! Abbiamo ricevuto la vostra richiesta — vi risponderemo al più presto
+              per confermare la disponibilità.
+            </p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              {aiDisclosure.confirmationNote}
+            </p>
+          </div>
         )}
         {status === "error" && (
           <p className="text-destructive">Qualcosa è andato storto. Riprova più tardi.</p>
