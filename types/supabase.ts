@@ -87,6 +87,17 @@ export type Database = {
           room_slug: Database["public"]["Enums"]["room_slug"];
         }[];
       };
+      check_room_availability_excluding: {
+        Args: {
+          p_check_in: string;
+          p_check_out: string;
+          p_exclude_reservation_id: string;
+        };
+        Returns: {
+          is_available: boolean;
+          room_slug: Database["public"]["Enums"]["room_slug"];
+        }[];
+      };
     };
     Enums: {
       reservation_status: "pending" | "confirmed" | "cancelled" | "blocked";

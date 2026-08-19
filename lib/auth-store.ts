@@ -166,9 +166,30 @@ export async function cancelReservation(id: string): Promise<Reservation> {
 }
 
 /**
+ * Live-checks whether a signed-in guest's reservation could move to a new
+ * date range — the same preview the "Prenota Ora" flow shows for a new
+ * booking, before the guest commits to saving. The actual guarantee still
+ * lives in the database's exclusion constraint (see modifyReservationDates
+ * below); this is only for showing the guest an answer before they submit.
+ */
+export async function checkReservationAvailability(
+  id: string,
+  checkIn: string,
+  checkOut: string,
+): Promise<boolean> {
+  const res = await fetch(
+    `/api/account/reservations/${id}/availability?checkIn=${checkIn}&checkOut=${checkOut}`,
+  );
+  if (!res.ok) return false;
+  const body = await res.json();
+  return Boolean(body.available);
+}
+
+/**
  * Extends or shortens the signed-in guest's own reservation. Availability
  * for the new dates is enforced by the database's exclusion constraint,
- * not checked client-side — see supabase/migrations/0008_guest_modify_dates.sql.
+ * not trusted from the client-side preview above — see
+ * supabase/migrations/0008_guest_modify_dates.sql.
  */
 export async function modifyReservationDates(
   id: string,

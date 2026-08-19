@@ -24,6 +24,8 @@ import {
   MapPin,
   Users2,
   Pencil,
+  Check,
+  X,
 } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -33,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import { LogoWatermark } from "@/components/ui/logo-watermark";
 import {
   Dialog,
   DialogContent,
@@ -45,6 +48,7 @@ import { FadeIn } from "@/components/animations/fade-in";
 import {
   ageFromDateOfBirth,
   cancelReservation,
+  checkReservationAvailability,
   getCurrentUser,
   getUserReservations,
   loginWithGoogle,
@@ -80,6 +84,152 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+/** Dark gradient header bar shared by every dialog on this page, matching
+ * the global "Prenota Ora" booking modal's look instead of a plain white
+ * card — the account area otherwise felt visually disconnected from the
+ * rest of the site. */
+function DialogHeaderBar({
+  icon,
+  title,
+  subtitle,
+  onClose,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+}) {
+  return (
+    <div className="border-gold/30 flex items-center justify-between border-b bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] p-6 text-white">
+      <div className="flex items-center gap-3">
+        <div className="bg-gold/20 border-gold/40 rounded-full border p-2">{icon}</div>
+        <div>
+          <h3 className="font-display text-xl font-medium">{title}</h3>
+          {subtitle && <p className="text-gold/90 mt-0.5 text-xs">{subtitle}</p>}
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Chiudi"
+        className="rounded-full bg-white/10 p-2 text-white/70 transition-all hover:bg-white/20 hover:text-white"
+      >
+        <X className="size-5" />
+      </button>
+    </div>
+  );
+}
+
+type EditableFieldKey = "name" | "phone" | "dateOfBirth" | "gender" | "address";
+
+/** One row of the account summary — read-only unless `editable`, in which
+ * case a pencil turns it into an inline input with save/cancel instead of
+ * navigating to a separate edit form. */
+function ProfileRow({
+  icon,
+  label,
+  displayValue,
+  editable,
+  isEditing,
+  draft,
+  onDraftChange,
+  onStartEdit,
+  onCancel,
+  onSave,
+  isSaving,
+  type = "text",
+  options,
+  placeholder,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  displayValue: string;
+  editable?: boolean;
+  isEditing?: boolean;
+  draft?: string;
+  onDraftChange?: (value: string) => void;
+  onStartEdit?: () => void;
+  onCancel?: () => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  type?: "text" | "tel" | "date" | "select";
+  options?: { value: string; label: string }[];
+  placeholder?: string;
+}) {
+  return (
+    <div className="border-border/60 bg-muted/30 flex flex-col gap-2 rounded-2xl border p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+      <span className="text-muted-foreground flex shrink-0 items-center gap-2">
+        {icon}
+        {label}
+      </span>
+
+      {editable && isEditing ? (
+        <div className="flex items-center gap-2">
+          {type === "select" ? (
+            <Select
+              autoFocus
+              value={draft}
+              onChange={(e) => onDraftChange?.(e.target.value)}
+              className="border-gold/40 h-9 text-xs"
+            >
+              {options?.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+          ) : (
+            <Input
+              autoFocus
+              type={type}
+              value={draft}
+              onChange={(e) => onDraftChange?.(e.target.value)}
+              placeholder={placeholder}
+              max={type === "date" ? new Date().toISOString().slice(0, 10) : undefined}
+              className="border-gold/40 h-9 text-xs"
+            />
+          )}
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            aria-label={`Salva ${label}`}
+            className="rounded-lg p-1.5 text-emerald-600 transition-colors hover:bg-emerald-500/10 disabled:opacity-50"
+          >
+            {isSaving ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Check className="size-4" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Annulla modifica"
+            className="text-muted-foreground hover:bg-muted rounded-lg p-1.5 transition-colors"
+          >
+            <X className="size-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{displayValue}</span>
+          {editable && (
+            <button
+              type="button"
+              onClick={onStartEdit}
+              aria-label={`Modifica ${label}`}
+              className="text-gold hover:bg-gold/10 rounded-lg p-1.5 transition-colors"
+            >
+              <Pencil className="size-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PROVIDER_LABELS: Record<UserProfile["provider"], string> = {
   google: "Google",
   apple: "Apple",
@@ -91,6 +241,11 @@ const GENDER_LABELS: Record<UserGender, string> = {
   male: "Uomo",
   unspecified: "Preferisco non specificare",
 };
+
+const GENDER_OPTIONS = (Object.keys(GENDER_LABELS) as UserGender[]).map((value) => ({
+  value,
+  label: GENDER_LABELS[value],
+}));
 
 function formatDate(iso?: string) {
   if (!iso) return "—";
@@ -119,14 +274,7 @@ export default function AccountPage() {
   // re-render from scratch.
   const [user, setUser] = useState<UserProfile | null>(null);
   const [activeTab, setActiveTab] = useState<"bookings" | "profile">("bookings");
-
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [gender, setGender] = useState<UserGender | "">("");
-  const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [profileSuccessMsg, setProfileSuccessMsg] = useState("");
   const [authError, setAuthError] = useState("");
 
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
@@ -177,6 +325,58 @@ export default function AccountPage() {
     }
   }
 
+  // ----------------------------------------------------
+  // Personal data — single banner, inline per-field editing
+  // ----------------------------------------------------
+  const [editingField, setEditingField] = useState<EditableFieldKey | null>(null);
+  const [fieldDraft, setFieldDraft] = useState("");
+  const [isSavingField, setIsSavingField] = useState(false);
+  const [fieldSaveError, setFieldSaveError] = useState("");
+
+  function startEditField(field: EditableFieldKey, currentValue: string) {
+    setEditingField(field);
+    setFieldDraft(currentValue);
+    setFieldSaveError("");
+  }
+
+  function cancelEditField() {
+    setEditingField(null);
+    setFieldSaveError("");
+  }
+
+  async function saveEditField() {
+    if (!editingField) return;
+    setIsSavingField(true);
+    setFieldSaveError("");
+    try {
+      switch (editingField) {
+        case "name":
+          await updateProfile({ name: fieldDraft });
+          break;
+        case "phone":
+          await updateProfile({ phone: fieldDraft });
+          break;
+        case "dateOfBirth":
+          await updateProfile({ dateOfBirth: fieldDraft });
+          break;
+        case "gender":
+          await updateProfile({ gender: fieldDraft as UserGender });
+          break;
+        case "address":
+          await updateProfile({ address: fieldDraft });
+          break;
+      }
+      setEditingField(null);
+    } catch (err) {
+      setFieldSaveError(err instanceof Error ? err.message : "Impossibile salvare.");
+    } finally {
+      setIsSavingField(false);
+    }
+  }
+
+  // ----------------------------------------------------
+  // Cancel a reservation
+  // ----------------------------------------------------
   const [cancelTarget, setCancelTarget] = useState<Reservation | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState("");
@@ -198,22 +398,64 @@ export default function AccountPage() {
     }
   }
 
+  // ----------------------------------------------------
+  // Modify a reservation's dates — live availability preview, same as the
+  // "Prenota Ora" flow, before letting the guest actually save.
+  // ----------------------------------------------------
   const [editTarget, setEditTarget] = useState<Reservation | null>(null);
   const [editCheckIn, setEditCheckIn] = useState("");
   const [editCheckOut, setEditCheckOut] = useState("");
   const [isSavingDates, setIsSavingDates] = useState(false);
   const [editDatesError, setEditDatesError] = useState("");
+  const [datesAvailability, setDatesAvailability] = useState<
+    "idle" | "checking" | "available" | "unavailable"
+  >("idle");
 
   function openEditDatesDialog(res: Reservation) {
     setEditTarget(res);
     setEditCheckIn(res.checkIn);
     setEditCheckOut(res.checkOut);
     setEditDatesError("");
+    setDatesAvailability("idle");
   }
+
+  function closeEditDatesDialog() {
+    setEditTarget(null);
+    setDatesAvailability("idle");
+  }
+
+  // Whether the two date fields currently form a checkable range — computed
+  // during render rather than tracked as its own state, so the invalid case
+  // never needs a synchronous setState inside the effect below.
+  const datesRangeValid = Boolean(
+    editCheckIn && editCheckOut && editCheckOut > editCheckIn,
+  );
+
+  useEffect(() => {
+    if (!editTarget || !datesRangeValid) return;
+    // "checking" is set inside the timeout callback, not synchronously in
+    // the effect body — during the 400ms debounce window the guest just
+    // sees the previous status rather than a flash of "checking" on every
+    // keystroke.
+    const timeout = setTimeout(() => {
+      setDatesAvailability("checking");
+      checkReservationAvailability(editTarget.id, editCheckIn, editCheckOut)
+        .then((available) =>
+          setDatesAvailability(available ? "available" : "unavailable"),
+        )
+        .catch(() => setDatesAvailability("idle"));
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [editTarget, editCheckIn, editCheckOut, datesRangeValid]);
+
+  // Ignores stale `datesAvailability` from before the range became invalid
+  // (e.g. the guest just picked a check-out before check-in) instead of
+  // trusting a leftover "available" from a previous valid combination.
+  const effectiveDatesAvailability = datesRangeValid ? datesAvailability : "idle";
 
   async function confirmModifyDates(e: React.FormEvent) {
     e.preventDefault();
-    if (!editTarget) return;
+    if (!editTarget || effectiveDatesAvailability !== "available") return;
     setIsSavingDates(true);
     setEditDatesError("");
     try {
@@ -223,7 +465,7 @@ export default function AccountPage() {
         editCheckOut,
       );
       setUserReservations((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
-      setEditTarget(null);
+      closeEditDatesDialog();
     } catch (err) {
       setEditDatesError(
         err instanceof Error ? err.message : "Impossibile modificare la prenotazione.",
@@ -246,24 +488,6 @@ export default function AccountPage() {
 
   async function handleLogout() {
     await logoutUser();
-  }
-
-  async function handleSaveProfile(e: React.FormEvent) {
-    e.preventDefault();
-    if (!user) return;
-    try {
-      await updateProfile({
-        name,
-        phone,
-        dateOfBirth: dateOfBirth || undefined,
-        gender: gender || undefined,
-        address: address || undefined,
-      });
-      setProfileSuccessMsg("Profilo aggiornato con successo!");
-      setTimeout(() => setProfileSuccessMsg(""), 3000);
-    } catch {
-      setProfileSuccessMsg("");
-    }
   }
 
   // ----------------------------------------------------
@@ -321,62 +545,80 @@ export default function AccountPage() {
   // ----------------------------------------------------
   return (
     <Section className="relative py-12">
+      <LogoWatermark />
+
       <Dialog
         open={showWelcomeDialog}
         onOpenChange={(open) => {
           if (!open) dismissWelcomeDialog();
         }}
       >
-        <DialogContent className="border-gold/40 bg-card max-w-md rounded-3xl border p-6 shadow-2xl sm:p-8">
-          <DialogTitle className="font-display text-gold not-sr-only text-xl font-semibold">
+        <DialogContent
+          showClose={false}
+          className="border-gold/40 bg-card max-w-md overflow-hidden rounded-3xl border p-0 shadow-2xl"
+        >
+          <DialogTitle className="sr-only">
             Benvenuto, {user.name.split(" ")[0]}!
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground not-sr-only text-sm">
+          <DialogDescription className="sr-only">
             Completa i tuoi dati una sola volta: verranno usati per pre-compilare
             automaticamente le tue prossime richieste di prenotazione.
           </DialogDescription>
+          <DialogHeaderBar
+            icon={<Sparkles className="text-gold size-5" />}
+            title={`Benvenuto, ${user.name.split(" ")[0]}!`}
+            subtitle="Donna Maria Suite & Relax · Serino (AV)"
+            onClose={dismissWelcomeDialog}
+          />
 
-          <form onSubmit={handleSaveWelcomeProfile} className="mt-4 flex flex-col gap-4">
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wName">Nome e Cognome</Label>
-              <Input
-                id="wName"
-                value={welcomeName}
-                onChange={(e) => setWelcomeName(e.target.value)}
-                required
-                className="border-gold/30"
-              />
-            </div>
+          <div className="p-6 sm:p-8">
+            <p className="text-muted-foreground mb-4 text-sm">
+              Completa i tuoi dati una sola volta: verranno usati per pre-compilare
+              automaticamente le tue prossime richieste di prenotazione.
+            </p>
 
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="wPhone">Telefono per Contatto</Label>
-              <Input
-                id="wPhone"
-                type="tel"
-                value={welcomePhone}
-                onChange={(e) => setWelcomePhone(e.target.value)}
-                placeholder="+39 347 0000000"
-                className="border-gold/30"
-              />
-            </div>
+            <form onSubmit={handleSaveWelcomeProfile} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="wName">Nome e Cognome</Label>
+                <Input
+                  id="wName"
+                  value={welcomeName}
+                  onChange={(e) => setWelcomeName(e.target.value)}
+                  required
+                  className="border-gold/30"
+                />
+              </div>
 
-            <div className="mt-2 flex items-center gap-3">
-              <Button
-                type="submit"
-                disabled={isSavingWelcome}
-                className="border-gold/40 hover:shadow-gold/30 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
-              >
-                {isSavingWelcome ? "Salvataggio…" : "Salva e continua"}
-              </Button>
-              <button
-                type="button"
-                onClick={dismissWelcomeDialog}
-                className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
-              >
-                Completa più tardi
-              </button>
-            </div>
-          </form>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="wPhone">Telefono per Contatto</Label>
+                <Input
+                  id="wPhone"
+                  type="tel"
+                  value={welcomePhone}
+                  onChange={(e) => setWelcomePhone(e.target.value)}
+                  placeholder="+39 347 0000000"
+                  className="border-gold/30"
+                />
+              </div>
+
+              <div className="mt-2 flex items-center gap-3">
+                <Button
+                  type="submit"
+                  disabled={isSavingWelcome}
+                  className="border-gold/40 hover:shadow-gold/30 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
+                >
+                  {isSavingWelcome ? "Salvataggio…" : "Salva e continua"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={dismissWelcomeDialog}
+                  className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
+                >
+                  Completa più tardi
+                </button>
+              </div>
+            </form>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -389,20 +631,28 @@ export default function AccountPage() {
           }
         }}
       >
-        <DialogContent className="border-gold/40 bg-card max-w-md rounded-3xl border p-6 shadow-2xl sm:p-8">
-          <DialogTitle className="font-display text-gold not-sr-only text-xl font-semibold">
-            Disdire la prenotazione?
-          </DialogTitle>
-          <DialogDescription>
+        <DialogContent
+          showClose={false}
+          className="border-gold/40 bg-card max-w-md overflow-hidden rounded-3xl border p-0 shadow-2xl"
+        >
+          <DialogTitle className="sr-only">Disdire la prenotazione?</DialogTitle>
+          <DialogDescription className="sr-only">
             Rivedi la policy di rimborso prima di confermare.
           </DialogDescription>
+          <DialogHeaderBar
+            icon={<Ban className="text-gold size-5" />}
+            title="Disdire la prenotazione?"
+            subtitle="Donna Maria Suite & Relax · Serino (AV)"
+            onClose={() => setCancelTarget(null)}
+          />
+
           {cancelTarget && (
-            <>
+            <div className="p-6 sm:p-8">
               {(() => {
                 const remaining = daysUntil(cancelTarget.checkIn);
                 const fullRefund = remaining >= 7;
                 return (
-                  <div className="mt-2 flex flex-col gap-4">
+                  <div className="flex flex-col gap-4">
                     <p className="text-muted-foreground text-sm">
                       {cancelTarget.roomName} · Check-in {cancelTarget.checkIn}
                     </p>
@@ -457,82 +707,113 @@ export default function AccountPage() {
                   </div>
                 );
               })()}
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
 
       <Dialog
         open={editTarget !== null}
-        onOpenChange={(open) => !open && setEditTarget(null)}
+        onOpenChange={(open) => !open && closeEditDatesDialog()}
       >
-        <DialogContent className="border-gold/40 bg-card max-w-md rounded-3xl border p-6 shadow-2xl sm:p-8">
-          <DialogTitle className="font-display text-gold not-sr-only text-xl font-semibold">
-            Modifica le date del soggiorno
-          </DialogTitle>
-          <DialogDescription>
+        <DialogContent
+          showClose={false}
+          className="border-gold/40 bg-card max-w-md overflow-hidden rounded-3xl border p-0 shadow-2xl"
+        >
+          <DialogTitle className="sr-only">Modifica le date del soggiorno</DialogTitle>
+          <DialogDescription className="sr-only">
             Cambia il periodo di check-in/check-out — verifichiamo subito la disponibilità
             per le nuove date.
           </DialogDescription>
+          <DialogHeaderBar
+            icon={<Calendar className="text-gold size-5" />}
+            title="Modifica le date del soggiorno"
+            subtitle="Donna Maria Suite & Relax · Serino (AV)"
+            onClose={closeEditDatesDialog}
+          />
 
           {editTarget && (
-            <form onSubmit={confirmModifyDates} className="mt-2 flex flex-col gap-4">
-              <p className="text-muted-foreground text-sm">{editTarget.roomName}</p>
+            <div className="p-6 sm:p-8">
+              <form onSubmit={confirmModifyDates} className="flex flex-col gap-4">
+                <p className="text-muted-foreground text-sm">{editTarget.roomName}</p>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="editCheckIn">Check-in</Label>
-                  <Input
-                    id="editCheckIn"
-                    type="date"
-                    value={editCheckIn}
-                    min={new Date().toISOString().slice(0, 10)}
-                    onChange={(e) => setEditCheckIn(e.target.value)}
-                    className="border-gold/30"
-                    required
-                  />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="editCheckIn">Check-in</Label>
+                    <Input
+                      id="editCheckIn"
+                      type="date"
+                      value={editCheckIn}
+                      min={new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setEditCheckIn(e.target.value)}
+                      className="border-gold/30"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="editCheckOut">Check-out</Label>
+                    <Input
+                      id="editCheckOut"
+                      type="date"
+                      value={editCheckOut}
+                      min={editCheckIn || new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setEditCheckOut(e.target.value)}
+                      className="border-gold/30"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="editCheckOut">Check-out</Label>
-                  <Input
-                    id="editCheckOut"
-                    type="date"
-                    value={editCheckOut}
-                    min={editCheckIn || new Date().toISOString().slice(0, 10)}
-                    onChange={(e) => setEditCheckOut(e.target.value)}
-                    className="border-gold/30"
-                    required
-                  />
+
+                {/* Same live-availability language as the "Prenota Ora" flow's
+                    results step, so a guest recognizes the pattern instead of
+                    only finding out at save time whether the dates work. */}
+                {effectiveDatesAvailability === "checking" && (
+                  <p className="text-muted-foreground flex items-center gap-2 text-xs">
+                    <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+                    Verifica disponibilità in corso…
+                  </p>
+                )}
+                {effectiveDatesAvailability === "available" && (
+                  <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 uppercase">
+                    <CheckCircle2 className="size-3.5" />
+                    Disponibile per queste date
+                  </p>
+                )}
+                {effectiveDatesAvailability === "unavailable" && (
+                  <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-600 uppercase">
+                    <XCircle className="size-3.5" />
+                    Non disponibile per queste date
+                  </p>
+                )}
+
+                {editDatesError && (
+                  <p className="text-destructive text-xs font-medium">{editDatesError}</p>
+                )}
+
+                <div className="mt-2 flex items-center gap-3">
+                  <Button
+                    type="submit"
+                    disabled={isSavingDates || effectiveDatesAvailability !== "available"}
+                    className="border-gold/40 hover:shadow-gold/30 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
+                  >
+                    {isSavingDates && <Loader2 className="size-4 animate-spin" />}
+                    Salva nuove date
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={closeEditDatesDialog}
+                    className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
+                  >
+                    Annulla
+                  </button>
                 </div>
-              </div>
-
-              {editDatesError && (
-                <p className="text-destructive text-xs font-medium">{editDatesError}</p>
-              )}
-
-              <div className="mt-2 flex items-center gap-3">
-                <Button
-                  type="submit"
-                  disabled={isSavingDates}
-                  className="border-gold/40 hover:shadow-gold/30 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
-                >
-                  {isSavingDates && <Loader2 className="size-4 animate-spin" />}
-                  Salva nuove date
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setEditTarget(null)}
-                  className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
-                >
-                  Annulla
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           )}
         </DialogContent>
       </Dialog>
 
-      <Container className="flex flex-col gap-8">
+      <Container className="relative z-10 flex flex-col gap-8">
         {/* User Card Header */}
         <div className="border-gold/40 flex flex-wrap items-center justify-between gap-4 rounded-3xl border bg-gradient-to-r from-[#181818] via-[#24201a] to-[#181818] p-6 text-white shadow-2xl backdrop-blur-xl">
           <div className="flex items-center gap-4">
@@ -593,14 +874,7 @@ export default function AccountPage() {
 
           <button
             type="button"
-            onClick={() => {
-              setActiveTab("profile");
-              setName(user.name);
-              setPhone(user.phone ?? "");
-              setDateOfBirth(user.dateOfBirth ?? "");
-              setGender(user.gender ?? "");
-              setAddress(user.address ?? "");
-            }}
+            onClick={() => setActiveTab("profile")}
             className={cn(
               "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-all",
               activeTab === "profile"
@@ -782,192 +1056,149 @@ export default function AccountPage() {
         )}
 
         {/* ---------------------------------------------------- */}
-        {/* TAB 2: DATI PERSONALI */}
+        {/* TAB 2: DATI PERSONALI — one banner, per-field inline edit */}
         {/* ---------------------------------------------------- */}
         {activeTab === "profile" && (
-          <div className="flex max-w-xl flex-col gap-6">
-            {/* Account summary */}
-            <div className="border-gold/30 bg-card/90 rounded-3xl border p-6 shadow-xl backdrop-blur-md">
-              <h2 className="font-display text-gold mb-4 text-xl font-semibold">
-                Il Tuo Account
-              </h2>
-              <div className="flex flex-col gap-3">
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Mail className="size-4" />
-                    Email
-                  </span>
-                  <span className="flex items-center gap-2 font-medium">
-                    {user.email}
-                    {user.emailVerified ? (
-                      <Badge variant="success" className="gap-1">
-                        <ShieldCheck className="size-3" />
-                        Verificata
-                      </Badge>
-                    ) : (
-                      <Badge variant="warning" className="gap-1">
-                        <ShieldAlert className="size-3" />
-                        Non verificata
-                      </Badge>
-                    )}
-                  </span>
-                </div>
+          <div className="border-gold/30 bg-card/90 max-w-xl rounded-3xl border p-6 shadow-xl backdrop-blur-md">
+            <h2 className="font-display text-gold mb-1 text-xl font-semibold">
+              I Tuoi Dati
+            </h2>
+            <p className="text-muted-foreground mb-6 text-xs">
+              Premi la matita accanto a un campo per modificarlo, poi salva — ogni dato si
+              aggiorna singolarmente.
+            </p>
 
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Phone className="size-4" />
-                    Telefono
-                  </span>
-                  <span className="font-medium">{user.phone || "Non specificato"}</span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Cake className="size-4" />
-                    Età
-                  </span>
-                  <span className="font-medium">
-                    {user.dateOfBirth
-                      ? `${ageFromDateOfBirth(user.dateOfBirth)} anni`
-                      : "Non specificata"}
-                  </span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Users2 className="size-4" />
-                    Genere
-                  </span>
-                  <span className="font-medium">
-                    {user.gender ? GENDER_LABELS[user.gender] : "Non specificato"}
-                  </span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <MapPin className="size-4" />
-                    Indirizzo
-                  </span>
-                  <span className="font-medium">{user.address || "Non specificato"}</span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <BadgeCheck className="size-4" />
-                    Metodo di accesso
-                  </span>
-                  <span className="font-medium">{PROVIDER_LABELS[user.provider]}</span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Calendar className="size-4" />
-                    Cliente dal
-                  </span>
-                  <span className="font-medium">{formatDate(user.createdAt)}</span>
-                </div>
-
-                <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
-                  <span className="text-muted-foreground flex items-center gap-2">
-                    <Clock className="size-4" />
-                    Ultimo accesso
-                  </span>
-                  <span className="font-medium">{formatDate(user.lastSignInAt)}</span>
-                </div>
+            {fieldSaveError && (
+              <div className="border-destructive/40 bg-destructive/10 text-destructive mb-4 rounded-2xl border p-3 text-xs font-semibold">
+                {fieldSaveError}
               </div>
-            </div>
+            )}
 
-            <div className="border-gold/30 bg-card/90 rounded-3xl border p-6 shadow-xl backdrop-blur-md">
-              <h2 className="font-display text-gold mb-1 text-xl font-semibold">
-                Modifica Dati Personali
-              </h2>
-              <p className="text-muted-foreground mb-6 text-xs">
-                Aggiorna le tue informazioni di contatto per le prossime prenotazioni
-              </p>
+            <div className="flex flex-col gap-3">
+              {/* Never editable — tied to the Google account. Shown as a
+                  plain row (not ProfileRow) because it needs the verified
+                  badge inline, which ProfileRow's plain-string displayValue
+                  can't express. */}
+              <div className="border-border/60 bg-muted/30 flex items-center justify-between gap-3 rounded-2xl border p-3 text-sm">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Mail className="size-4" />
+                  Email
+                </span>
+                <span className="flex items-center gap-2 font-medium">
+                  {user.email}
+                  {user.emailVerified ? (
+                    <Badge variant="success" className="gap-1">
+                      <ShieldCheck className="size-3" />
+                      Verificata
+                    </Badge>
+                  ) : (
+                    <Badge variant="warning" className="gap-1">
+                      <ShieldAlert className="size-3" />
+                      Non verificata
+                    </Badge>
+                  )}
+                </span>
+              </div>
 
-              {profileSuccessMsg && (
-                <div className="mb-4 flex items-center gap-2 rounded-2xl border border-emerald-500/40 bg-emerald-500/15 p-4 text-xs font-semibold text-emerald-600">
-                  <Sparkles className="size-4" />
-                  <span>{profileSuccessMsg}</span>
-                </div>
-              )}
+              <ProfileRow
+                icon={<User className="size-4" />}
+                label="Nome e Cognome"
+                displayValue={user.name}
+                editable
+                isEditing={editingField === "name"}
+                draft={fieldDraft}
+                onDraftChange={setFieldDraft}
+                onStartEdit={() => startEditField("name", user.name)}
+                onCancel={cancelEditField}
+                onSave={saveEditField}
+                isSaving={isSavingField}
+              />
 
-              <form onSubmit={handleSaveProfile} className="flex flex-col gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pName">Nome e Cognome</Label>
-                  <Input
-                    id="pName"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="border-gold/30"
-                  />
-                </div>
+              <ProfileRow
+                icon={<Phone className="size-4" />}
+                label="Telefono"
+                displayValue={user.phone || "Non specificato"}
+                editable
+                isEditing={editingField === "phone"}
+                draft={fieldDraft}
+                onDraftChange={setFieldDraft}
+                onStartEdit={() => startEditField("phone", user.phone ?? "")}
+                onCancel={cancelEditField}
+                onSave={saveEditField}
+                isSaving={isSavingField}
+                type="tel"
+                placeholder="+39 347 0000000"
+              />
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pEmail">Email (Non modificabile)</Label>
-                  <Input id="pEmail" value={user.email} disabled className="bg-muted" />
-                </div>
+              <ProfileRow
+                icon={<Cake className="size-4" />}
+                label="Età"
+                displayValue={
+                  user.dateOfBirth
+                    ? `${ageFromDateOfBirth(user.dateOfBirth)} anni`
+                    : "Non specificata"
+                }
+                editable
+                isEditing={editingField === "dateOfBirth"}
+                draft={fieldDraft}
+                onDraftChange={setFieldDraft}
+                onStartEdit={() => startEditField("dateOfBirth", user.dateOfBirth ?? "")}
+                onCancel={cancelEditField}
+                onSave={saveEditField}
+                isSaving={isSavingField}
+                type="date"
+              />
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pPhone">Telefono per Contatto</Label>
-                  <Input
-                    id="pPhone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+39 347 0000000"
-                    className="border-gold/30"
-                  />
-                </div>
+              <ProfileRow
+                icon={<Users2 className="size-4" />}
+                label="Genere"
+                displayValue={
+                  user.gender ? GENDER_LABELS[user.gender] : "Non specificato"
+                }
+                editable
+                isEditing={editingField === "gender"}
+                draft={fieldDraft}
+                onDraftChange={setFieldDraft}
+                onStartEdit={() => startEditField("gender", user.gender ?? "unspecified")}
+                onCancel={cancelEditField}
+                onSave={saveEditField}
+                isSaving={isSavingField}
+                type="select"
+                options={GENDER_OPTIONS}
+              />
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="pDateOfBirth">Data di Nascita</Label>
-                    <Input
-                      id="pDateOfBirth"
-                      type="date"
-                      value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
-                      max={new Date().toISOString().slice(0, 10)}
-                      className="border-gold/30"
-                    />
-                  </div>
+              <ProfileRow
+                icon={<MapPin className="size-4" />}
+                label="Indirizzo"
+                displayValue={user.address || "Non specificato"}
+                editable
+                isEditing={editingField === "address"}
+                draft={fieldDraft}
+                onDraftChange={setFieldDraft}
+                onStartEdit={() => startEditField("address", user.address ?? "")}
+                onCancel={cancelEditField}
+                onSave={saveEditField}
+                isSaving={isSavingField}
+                placeholder="Via Roma 1, 83028 Serino (AV)"
+              />
 
-                  <div className="flex flex-col gap-1.5">
-                    <Label htmlFor="pGender">Genere</Label>
-                    <Select
-                      id="pGender"
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value as UserGender | "")}
-                      className="border-gold/30"
-                    >
-                      <option value="">Seleziona…</option>
-                      <option value="female">Donna</option>
-                      <option value="male">Uomo</option>
-                      <option value="unspecified">Preferisco non specificare</option>
-                    </Select>
-                  </div>
-                </div>
+              <ProfileRow
+                icon={<BadgeCheck className="size-4" />}
+                label="Metodo di accesso"
+                displayValue={PROVIDER_LABELS[user.provider]}
+              />
 
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="pAddress">Indirizzo di Residenza</Label>
-                  <Input
-                    id="pAddress"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Via Roma 1, 83028 Serino (AV)"
-                    className="border-gold/30"
-                  />
-                </div>
+              <ProfileRow
+                icon={<Calendar className="size-4" />}
+                label="Cliente dal"
+                displayValue={formatDate(user.createdAt)}
+              />
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="border-gold/40 hover:shadow-gold/30 mt-2 self-start border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
-                >
-                  Salva Modifiche
-                </Button>
-              </form>
+              <ProfileRow
+                icon={<Clock className="size-4" />}
+                label="Ultimo accesso"
+                displayValue={formatDate(user.lastSignInAt)}
+              />
             </div>
           </div>
         )}
