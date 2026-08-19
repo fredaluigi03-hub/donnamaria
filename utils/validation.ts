@@ -44,3 +44,22 @@ export const bookingFormSchema = z
   });
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;
+
+/** Just the date pair, reused by the "modify my reservation's dates" flow —
+ * same rules as bookingFormSchema's dates (checkOut after checkIn, checkIn
+ * not in the past), without requiring a full new-booking form's fields. */
+export const stayDatesSchema = z
+  .object({
+    checkIn: z.string().min(1, "Seleziona la data di check-in."),
+    checkOut: z.string().min(1, "Seleziona la data di check-out."),
+  })
+  .refine((data) => data.checkOut > data.checkIn, {
+    message: "La data di check-out deve essere successiva al check-in.",
+    path: ["checkOut"],
+  })
+  .refine((data) => data.checkIn >= new Date().toISOString().slice(0, 10), {
+    message: "La data di check-in non può essere nel passato.",
+    path: ["checkIn"],
+  });
+
+export type StayDatesValues = z.infer<typeof stayDatesSchema>;

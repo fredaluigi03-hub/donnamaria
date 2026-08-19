@@ -18,6 +18,7 @@ export type Database = {
       reservations: {
         Row: {
           adults: number;
+          cancelled_at: string | null;
           children: number;
           created_at: string;
           customer_name: string;
@@ -25,6 +26,7 @@ export type Database = {
           id: string;
           notes: string | null;
           phone: string;
+          refund_percentage: number | null;
           room_slug: Database["public"]["Enums"]["room_slug"];
           status: Database["public"]["Enums"]["reservation_status"];
           stay: unknown;
@@ -35,6 +37,7 @@ export type Database = {
         };
         Insert: {
           adults?: number;
+          cancelled_at?: string | null;
           children?: number;
           created_at?: string;
           customer_name: string;
@@ -42,6 +45,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           phone: string;
+          refund_percentage?: number | null;
           room_slug: Database["public"]["Enums"]["room_slug"];
           status?: Database["public"]["Enums"]["reservation_status"];
           stay: unknown;
@@ -52,6 +56,7 @@ export type Database = {
         };
         Update: {
           adults?: number;
+          cancelled_at?: string | null;
           children?: number;
           created_at?: string;
           customer_name?: string;
@@ -59,6 +64,7 @@ export type Database = {
           id?: string;
           notes?: string | null;
           phone?: string;
+          refund_percentage?: number | null;
           room_slug?: Database["public"]["Enums"]["room_slug"];
           status?: Database["public"]["Enums"]["reservation_status"];
           stay?: unknown;

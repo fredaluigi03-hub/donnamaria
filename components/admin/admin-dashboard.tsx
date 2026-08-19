@@ -23,6 +23,7 @@ import {
   Edit,
   Settings,
   Tag,
+  BarChart3,
 } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -38,6 +39,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AdminStats } from "@/components/admin/admin-stats";
 import { rooms } from "@/config/rooms";
 import { useMounted } from "@/hooks/use-mounted";
 import {
@@ -79,7 +81,7 @@ export function AdminDashboard() {
   const mounted = useMounted();
 
   const [activeTab, setActiveTab] = useState<
-    "calendar" | "reservations" | "new" | "prices" | "settings"
+    "calendar" | "reservations" | "new" | "stats" | "prices" | "settings"
   >("calendar");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -425,6 +427,20 @@ export function AdminDashboard() {
           >
             <PlusCircle className="size-4" />
             <span>Nuova Prenotazione</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab("stats")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold tracking-wider uppercase transition-all",
+              activeTab === "stats"
+                ? "border-gold/60 shadow-gold/20 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] text-amber-100 shadow-lg"
+                : "text-muted-foreground hover:bg-gold/10 hover:text-foreground",
+            )}
+          >
+            <BarChart3 className="size-4" />
+            <span>Statistiche</span>
           </button>
 
           <button
@@ -980,7 +996,12 @@ export function AdminDashboard() {
         )}
 
         {/* ---------------------------------------------------- */}
-        {/* TAB 4: GESTIONE PREZZI CAMERE */}
+        {/* TAB 4: STATISTICHE */}
+        {/* ---------------------------------------------------- */}
+        {activeTab === "stats" && <AdminStats reservations={reservations} />}
+
+        {/* ---------------------------------------------------- */}
+        {/* TAB 5: GESTIONE PREZZI CAMERE */}
         {/* ---------------------------------------------------- */}
         {activeTab === "prices" && (
           <div className="border-gold/30 bg-card/90 flex max-w-2xl flex-col gap-6 rounded-3xl border p-6 shadow-xl backdrop-blur-md">
@@ -1066,7 +1087,7 @@ export function AdminDashboard() {
         )}
 
         {/* ---------------------------------------------------- */}
-        {/* TAB 5: IMPOSTAZIONI STRUTTURA */}
+        {/* TAB 6: IMPOSTAZIONI STRUTTURA */}
         {/* ---------------------------------------------------- */}
         {activeTab === "settings" && (
           <div className="border-gold/30 bg-card/90 flex max-w-2xl flex-col gap-6 rounded-3xl border p-6 shadow-xl backdrop-blur-md">

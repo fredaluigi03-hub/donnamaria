@@ -11,6 +11,12 @@ import { getRoomBySlug } from "@/config/rooms";
  * (supabase/migrations/0005_guest_reservations_rls.sql) does the actual
  * filtering — this route can't leak another guest's bookings even if the
  * query below were ever changed to omit a filter.
+ *
+ * No `.eq("email", ...)` filter here on purpose: RLS already matches
+ * case-insensitively (`lower(email) = lower(jwt email)`), but a plain
+ * `.eq()` here is case-sensitive and would silently hide every booking
+ * whose stored email differs only in case from the Google account email —
+ * which is exactly what made "my bookings" appear empty for real guests.
  */
 export async function GET() {
   const supabase = await createClient();
@@ -25,7 +31,6 @@ export async function GET() {
   const { data, error } = await supabase
     .from("reservations")
     .select("*")
-    .eq("email", user.email)
     .order("created_at", { ascending: false });
 
   if (error)

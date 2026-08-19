@@ -13,6 +13,9 @@ export interface Reservation {
   totalPrice: number;
   notes?: string;
   createdAt: string;
+  cancelledAt?: string;
+  /** % of totalPrice refunded to the guest; only set once cancelled. */
+  refundPercentage?: number;
 }
 
 /** Postgres range literal, e.g. "2026-09-10" + "2026-09-12" → "[2026-09-10,2026-09-12)". */
@@ -24,6 +27,11 @@ export function toStayRange(checkIn: string, checkOut: string): string {
 export function fromStayRange(range: string): { checkIn: string; checkOut: string } {
   const match = /[[(]([^,]+),([^)\]]+)[)\]]/.exec(range);
   return { checkIn: match?.[1] ?? "", checkOut: match?.[2] ?? "" };
+}
+
+export function nightsBetween(checkIn: string, checkOut: string): number {
+  const ms = new Date(checkOut).getTime() - new Date(checkIn).getTime();
+  return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
 /** Shape of a raw `reservations` row as returned by PostgREST. */
@@ -40,6 +48,8 @@ export interface ReservationRow {
   total_price: number;
   notes: string | null;
   created_at: string;
+  cancelled_at: string | null;
+  refund_percentage: number | null;
 }
 
 /** Row → `Reservation`. Shared by the admin route and the guest-scoped
@@ -64,6 +74,8 @@ export function mapReservationRow(
     totalPrice: row.total_price,
     notes: row.notes ?? undefined,
     createdAt: row.created_at,
+    cancelledAt: row.cancelled_at ?? undefined,
+    refundPercentage: row.refund_percentage ?? undefined,
   };
 }
 

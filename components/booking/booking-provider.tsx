@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
@@ -32,6 +39,26 @@ import { aiDisclosure, siteConfig } from "@/config/site";
 import { emailSchema } from "@/utils/validation";
 import type { RoomSlug } from "@/types";
 import { cn } from "@/lib/utils";
+import { getCurrentUser } from "@/lib/auth-store";
+
+/** "Luigi Freda" → { firstName: "Luigi", lastName: "Freda" }. */
+function splitFullName(fullName: string): { firstName: string; lastName: string } {
+  const [firstName = "", ...rest] = fullName.trim().split(/\s+/);
+  return { firstName, lastName: rest.join(" ") };
+}
+
+/** Values pre-filled from the signed-in guest's saved profile, so returning
+ * guests never retype their contact details — still fully editable, this
+ * only sets the initial value of each field. */
+function guestDetailsFromProfile(): Partial<GuestDetailsValues> {
+  const user = getCurrentUser();
+  if (!user) return {};
+  return {
+    ...splitFullName(user.name),
+    email: user.email,
+    phone: user.phone ?? "",
+  };
+}
 
 function nightsBetween(checkIn: string, checkOut: string): number {
   const ms = new Date(checkOut).getTime() - new Date(checkIn).getTime();
@@ -112,7 +139,10 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     handleSubmit,
     reset: resetGuestForm,
     formState: { errors, isSubmitting },
-  } = useForm<GuestDetailsValues>({ resolver: zodResolver(guestDetailsSchema) });
+  } = useForm<GuestDetailsValues>({
+    resolver: zodResolver(guestDetailsSchema),
+    defaultValues: guestDetailsFromProfile(),
+  });
 
   const nights = nightsBetween(checkIn, checkOut);
 
@@ -177,6 +207,21 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
 
   const closeBooking = useCallback(() => setStep("closed"), []);
 
+  // Without this, a wheel/touch scroll starting over the backdrop (or any
+  // non-scrollable part of the modal) falls through to the page underneath
+  // — which is fixed in place but still scrolls its own document, so the
+  // guest sees nothing move and assumes scrolling is broken. Locking the
+  // body while open means every scroll gesture always lands on the modal's
+  // own `overflow-y-auto` content instead.
+  useEffect(() => {
+    if (step === "closed") return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [step]);
+
   function handleSearchSubmit(event: React.FormEvent) {
     event.preventDefault();
     setStep("results");
@@ -187,7 +232,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   function handlePickRoom(room: RoomAvailability) {
     setSelectedRoom(room);
     setSubmitError("");
-    resetGuestForm();
+    resetGuestForm(guestDetailsFromProfile());
     setStep("details");
   }
 

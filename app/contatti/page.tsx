@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Suspense } from "react";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 
@@ -18,8 +19,27 @@ export const metadata: Metadata = buildMetadata({
 
 export default function ContattiPage() {
   return (
-    <Section className="pt-32">
-      <Container>
+    <Section className="relative pt-32">
+      {/* Watermark, not a stretched hero background: the source logo is
+          388×387px, so it's shown near its native size (object-contain,
+          capped width) instead of scaled up to fill the section — which
+          would blur it — and kept faint enough that any softness at the
+          edges is invisible. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden"
+      >
+        <Image
+          src="/images/logo.png"
+          alt=""
+          width={388}
+          height={387}
+          priority
+          className="w-full max-w-md opacity-[0.05] grayscale sm:max-w-lg"
+        />
+      </div>
+
+      <Container className="relative z-10">
         <FadeIn>
           <PageHeading
             title="Raccontaci il tuo soggiorno ideale."

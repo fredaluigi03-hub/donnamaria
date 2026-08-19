@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
@@ -16,6 +16,7 @@ import { GuestPicker } from "@/components/booking/guest-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 import { rooms } from "@/config/rooms";
 import { aiDisclosure } from "@/config/site";
+import { getCurrentUser } from "@/lib/auth-store";
 
 /**
  * "Richiesta di disponibilità" — same pattern as contact-form.tsx (React
@@ -26,7 +27,9 @@ import { aiDisclosure } from "@/config/site";
  * surfaces that as a 409 instead of trusting a client-side check.
  *
  * Prefilled from the homepage search widget via query params
- * (?checkIn=&checkOut=&adults=&children=&camera=) when present.
+ * (?checkIn=&checkOut=&adults=&children=&camera=) when present, and from
+ * the signed-in guest's saved profile (name/email/phone) when logged in —
+ * so a returning guest never has to retype contact details.
  */
 export function BookingForm() {
   const searchParams = useSearchParams();
@@ -35,11 +38,13 @@ export function BookingForm() {
   const prefilledChildren = Number(searchParams.get("children") ?? "0") || 0;
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const currentUser = getCurrentUser();
 
   const {
     register,
     control,
     setValue,
+    getValues,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -51,6 +56,9 @@ export function BookingForm() {
       checkOut: searchParams.get("checkOut") ?? "",
       adults: prefilledAdults,
       children: prefilledChildren,
+      name: currentUser?.name ?? "",
+      email: currentUser?.email ?? "",
+      phone: currentUser?.phone ?? "",
     },
   });
 
@@ -58,6 +66,25 @@ export function BookingForm() {
   const children = useWatch({ control, name: "children" });
   const checkInValue = useWatch({ control, name: "checkIn" });
   const today = new Date().toISOString().slice(0, 10);
+
+  // The signed-in profile resolves asynchronously after mount (see
+  // auth-store.ts), so a session already active on page load can arrive
+  // after `useForm`'s defaultValues were read. Fill the contact fields
+  // once it does, but only if the guest hasn't already typed something.
+  useEffect(() => {
+    function fillFromProfile() {
+      const profileUser = getCurrentUser();
+      if (!profileUser) return;
+      const values = getValues();
+      if (!values.name) setValue("name", profileUser.name);
+      if (!values.email) setValue("email", profileUser.email);
+      if (!values.phone && profileUser.phone) setValue("phone", profileUser.phone);
+    }
+    fillFromProfile();
+    window.addEventListener("donnamaria_auth_state_changed", fillFromProfile);
+    return () =>
+      window.removeEventListener("donnamaria_auth_state_changed", fillFromProfile);
+  }, [getValues, setValue]);
 
   async function onSubmit(values: BookingFormValues) {
     try {

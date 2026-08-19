@@ -1,14 +1,9 @@
 import { NextResponse } from "next/server";
 
 import { createAnonServerClient } from "@/lib/supabase/anon";
-import { toStayRange } from "@/lib/admin-store";
+import { nightsBetween, toStayRange } from "@/lib/admin-store";
 import { bookingFormSchema } from "@/utils/validation";
 import { getRoomBySlug } from "@/config/rooms";
-
-function nightsBetween(checkIn: string, checkOut: string): number {
-  const ms = new Date(checkOut).getTime() - new Date(checkIn).getTime();
-  return Math.round(ms / (1000 * 60 * 60 * 24));
-}
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
