@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   User,
-  Mail,
-  Lock,
-  Phone,
   LogOut,
   Calendar,
   Sparkles,
@@ -14,10 +11,7 @@ import {
   Clock,
   XCircle,
   ArrowRight,
-  ShieldCheck,
   Bed,
-  CreditCard,
-  Building2,
 } from "lucide-react";
 
 import { Container } from "@/components/ui/container";
@@ -31,16 +25,14 @@ import { FadeIn } from "@/components/animations/fade-in";
 import {
   getCurrentUser,
   getUserReservations,
-  loginWithEmail,
-  loginWithOAuth,
+  loginWithGoogle,
   logoutUser,
-  setCurrentUser,
+  updateProfile,
   type UserProfile,
 } from "@/lib/auth-store";
 import { type Reservation } from "@/lib/admin-store";
 import { cn } from "@/lib/utils";
 
-// Official Google & Apple SVG Icons
 function GoogleIcon({ className }: { className?: string }) {
   return (
     <svg className={cn("size-5", className)} viewBox="0 0 24 24">
@@ -64,26 +56,15 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
-function AppleIcon({ className }: { className?: string }) {
-  return (
-    <svg className={cn("size-5 fill-current", className)} viewBox="0 0 170 170">
-      <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.34.13-9.14-1.9-14.4-6.09-3.48-2.81-7.43-7.58-11.84-14.31-6.19-9.5-11.05-20.08-14.58-31.75-3.53-11.67-5.3-22.95-5.3-33.84 0-14.75 3.82-27.18 11.46-37.3 7.64-10.12 17.15-15.28 28.53-15.48 4.7 0 10.05 1.25 16.05 3.75 6 2.5 10.2 3.82 12.6 3.96 2.01 0 6.32-1.39 12.92-4.17 6.6-2.78 12.18-4.04 16.74-3.77 12.58.6 22.75 5.16 30.51 13.68-11.1 6.72-16.52 16.14-16.27 28.26.25 9.6 3.99 17.58 11.22 23.94 7.23 6.36 15.82 10.01 25.77 10.96-2.52 7.7-6 15.54-10.44 23.52zM119.22 31.07c0-7.23 2.65-14.19 7.95-20.88 5.3-6.69 11.96-10.73 19.98-12.13.25 1.01.38 1.95.38 2.82 0 7.23-2.71 14.3-8.13 21.2-5.42 6.9-12.06 10.87-19.92 11.91-.07-.94-.26-1.92-.26-2.92z" />
-    </svg>
-  );
-}
-
 export default function AccountPage() {
   const [user, setUser] = useState<UserProfile | null>(() => getCurrentUser());
-  const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [activeTab, setActiveTab] = useState<"bookings" | "profile">("bookings");
 
-  // Form states
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [profileSuccessMsg, setProfileSuccessMsg] = useState("");
+  const [authError, setAuthError] = useState("");
 
   const [userReservations, setUserReservations] = useState<Reservation[]>([]);
 
@@ -92,63 +73,44 @@ export default function AccountPage() {
       const current = getCurrentUser();
       setUser(current);
       if (current) {
-        setUserReservations(getUserReservations(current.email));
+        getUserReservations().then(setUserReservations);
+      } else {
+        setUserReservations([]);
       }
     }
     syncAuth();
 
     window.addEventListener("donnamaria_auth_state_changed", syncAuth);
-    window.addEventListener("donnamaria_reservations_updated", syncAuth);
     return () => {
       window.removeEventListener("donnamaria_auth_state_changed", syncAuth);
-      window.removeEventListener("donnamaria_reservations_updated", syncAuth);
     };
   }, []);
 
-  async function handleOAuthLogin(provider: "google" | "apple") {
+  async function handleGoogleLogin() {
     setIsLoading(true);
+    setAuthError("");
     try {
-      const loggedUser = await loginWithOAuth(provider);
-      setUser(loggedUser);
-      setUserReservations(getUserReservations(loggedUser.email));
-    } finally {
+      await loginWithGoogle(); // navigates away to Google; no further state update here
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Impossibile avviare l'accesso.");
       setIsLoading(false);
     }
   }
 
-  async function handleEmailAuth(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      const loggedUser = await loginWithEmail(
-        email,
-        authMode === "register" ? name : undefined,
-      );
-      setUser(loggedUser);
-      setUserReservations(getUserReservations(loggedUser.email));
-    } finally {
-      setIsLoading(false);
-    }
+  async function handleLogout() {
+    await logoutUser();
   }
 
-  function handleLogout() {
-    logoutUser();
-    setUser(null);
-    setUserReservations([]);
-  }
-
-  function handleSaveProfile(e: React.FormEvent) {
+  async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!user) return;
-    const updated: UserProfile = {
-      ...user,
-      name,
-      phone,
-    };
-    setCurrentUser(updated);
-    setUser(updated);
-    setProfileSuccessMsg("Profilo aggiornato con successo!");
-    setTimeout(() => setProfileSuccessMsg(""), 3000);
+    try {
+      await updateProfile({ name, phone });
+      setProfileSuccessMsg("Profilo aggiornato con successo!");
+      setTimeout(() => setProfileSuccessMsg(""), 3000);
+    } catch {
+      setProfileSuccessMsg("");
+    }
   }
 
   // ----------------------------------------------------
@@ -173,124 +135,28 @@ export default function AccountPage() {
           </div>
 
           <div className="border-gold/40 bg-card/95 ring-gold/20 relative w-full overflow-hidden rounded-3xl border p-6 shadow-2xl ring-1 shadow-black/10 backdrop-blur-2xl sm:p-8">
-            {/* Social Login Buttons */}
-            <div className="flex flex-col gap-3">
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => handleOAuthLogin("google")}
-                className="hover:border-gold/60 hover:bg-gold/10 border-border bg-background text-foreground flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-semibold shadow-md transition-all"
-              >
-                <GoogleIcon />
-                <span>Accedi con Google</span>
-              </button>
+            <button
+              type="button"
+              disabled={isLoading}
+              onClick={handleGoogleLogin}
+              className="hover:border-gold/60 hover:bg-gold/10 border-border bg-background text-foreground flex h-12 w-full items-center justify-center gap-3 rounded-2xl border text-sm font-semibold shadow-md transition-all disabled:opacity-60"
+            >
+              <GoogleIcon />
+              <span>
+                {isLoading ? "Reindirizzamento a Google…" : "Accedi con Google"}
+              </span>
+            </button>
 
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => handleOAuthLogin("apple")}
-                className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-black bg-black text-sm font-semibold text-white shadow-md transition-all hover:bg-neutral-800"
-              >
-                <AppleIcon />
-                <span>Accedi con Apple</span>
-              </button>
-            </div>
+            {authError && (
+              <p className="mt-4 text-center text-xs font-medium text-red-600">
+                {authError}
+              </p>
+            )}
 
-            {/* Divider */}
-            <div className="text-muted-foreground my-6 flex items-center justify-center gap-4 text-xs">
-              <span className="bg-border h-px flex-1" />
-              <span className="tracking-widest uppercase">oppure con email</span>
-              <span className="bg-border h-px flex-1" />
-            </div>
-
-            {/* Mode Switcher */}
-            <div className="border-border/80 bg-muted/50 mb-6 flex rounded-2xl border p-1">
-              <button
-                type="button"
-                onClick={() => setAuthMode("login")}
-                className={cn(
-                  "flex-1 rounded-xl py-2 text-xs font-semibold tracking-wider uppercase transition-all",
-                  authMode === "login"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                Accedi
-              </button>
-              <button
-                type="button"
-                onClick={() => setAuthMode("register")}
-                className={cn(
-                  "flex-1 rounded-xl py-2 text-xs font-semibold tracking-wider uppercase transition-all",
-                  authMode === "register"
-                    ? "bg-card text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                Registrati
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleEmailAuth} className="flex flex-col gap-4">
-              {authMode === "register" && (
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="regName">Nome e Cognome</Label>
-                  <div className="relative">
-                    <User className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                    <Input
-                      id="regName"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Mario Rossi"
-                      className="border-gold/30 pl-9"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="userEmail">Email</Label>
-                <div className="relative">
-                  <Mail className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                  <Input
-                    id="userEmail"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="mario.rossi@gmail.com"
-                    className="border-gold/30 pl-9"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="userPassword">Password</Label>
-                <div className="relative">
-                  <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-                  <Input
-                    id="userPassword"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="border-gold/30 pl-9"
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                size="lg"
-                disabled={isLoading}
-                className="border-gold/40 hover:shadow-gold/30 mt-2 border bg-gradient-to-r from-[#181818] via-[#28221b] to-[#181818] font-semibold text-amber-100 uppercase transition-all"
-              >
-                {authMode === "login" ? "Accedi" : "Crea Account"}
-              </Button>
-            </form>
+            <p className="text-muted-foreground mt-6 text-center text-xs">
+              L&apos;accesso con email/password non è ancora disponibile — al momento è
+              supportato solo l&apos;accesso con Google.
+            </p>
           </div>
         </Container>
       </Section>

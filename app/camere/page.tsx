@@ -28,6 +28,7 @@ export default function CamerePage() {
           label: "Richiedi disponibilità",
           href: "/contatti#richiedi-disponibilita",
         }}
+        primaryCtaOpensBooking
       />
 
       <Section>

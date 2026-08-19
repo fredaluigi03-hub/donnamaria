@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { ChevronDown, Menu, User, X } from "lucide-react";
 import { getCurrentUser, type UserProfile } from "@/lib/auth-store";
+import { useBooking } from "@/components/booking/booking-provider";
 
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const roomsMenuExtraLinks = [
 ];
 
 export function Header() {
+  const { openBooking } = useBooking();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [pastHeroFootage, setPastHeroFootage] = useState(false);
@@ -271,7 +273,7 @@ export function Header() {
             </Link>
 
             <Button
-              asChild
+              onClick={() => openBooking()}
               className={cn(
                 "rounded-full px-6 transition-all",
                 scrolled
@@ -279,7 +281,7 @@ export function Header() {
                   : "bg-white/90 text-black hover:bg-white",
               )}
             >
-              <Link href="/contatti#richiedi-disponibilita">Prenota Ora</Link>
+              Prenota Ora
             </Button>
           </div>
 
@@ -328,13 +330,14 @@ export function Header() {
               </Link>
             ))}
             <div className="pt-2">
-              <Button asChild className="w-full">
-                <Link
-                  href="/contatti#richiedi-disponibilita"
-                  onClick={() => setOpen(false)}
-                >
-                  Prenota Ora
-                </Link>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setOpen(false);
+                  openBooking();
+                }}
+              >
+                Prenota Ora
               </Button>
             </div>
           </Container>

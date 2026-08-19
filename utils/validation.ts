@@ -19,7 +19,9 @@ export const bookingFormSchema = z
     name: z.string().trim().min(2, "Inserisci il tuo nome."),
     email: emailSchema,
     phone: z.string().trim().min(6, "Inserisci un numero di telefono valido."),
-    room: z.string().trim().optional(),
+    // Required, not optional: the room is what actually gets reserved in
+    // the database now — "no preference" can't lock a specific row.
+    room: z.string().trim().min(1, "Seleziona una camera."),
     checkIn: z.string().min(1, "Seleziona la data di check-in."),
     checkOut: z.string().min(1, "Seleziona la data di check-out."),
     // Adults/children rather than a single "guests" count, so the
@@ -32,6 +34,13 @@ export const bookingFormSchema = z
   .refine((data) => data.checkOut > data.checkIn, {
     message: "La data di check-out deve essere successiva al check-in.",
     path: ["checkOut"],
+  })
+  // Computed inside the refine, not hoisted to a module-level constant —
+  // this schema is a shared singleton, so "today" must be evaluated fresh
+  // on each validation call, not frozen at the moment the server started.
+  .refine((data) => data.checkIn >= new Date().toISOString().slice(0, 10), {
+    message: "La data di check-in non può essere nel passato.",
+    path: ["checkIn"],
   });
 
 export type BookingFormValues = z.infer<typeof bookingFormSchema>;

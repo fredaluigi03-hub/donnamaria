@@ -1,9 +1,5 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-
 import { Container } from "@/components/ui/container";
 import { Section } from "@/components/ui/section";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Glow } from "@/components/ui/glow";
 import { Kicker } from "@/components/ui/kicker";
@@ -40,6 +36,7 @@ const accentBarClass: Record<Room["accent"], string> = {
  */
 import { Tilt3D } from "@/components/animations/tilt-3d";
 import { AiRoomNote } from "@/components/ui/ai-disclosure";
+import { BookRoomButton } from "@/components/booking/book-room-button";
 
 const roomDetailThemeConfig: Record<
   Room["accent"],
@@ -98,6 +95,8 @@ export function RoomDetail({ room }: { room: Room }) {
           label: "Richiedi disponibilità",
           href: `/contatti?camera=${room.slug}#richiedi-disponibilita`,
         }}
+        primaryCtaOpensBooking
+        primaryCtaRoomSlug={room.slug}
       />
 
       <Section>
@@ -216,19 +215,13 @@ export function RoomDetail({ room }: { room: Room }) {
                         </StaggerItem>
                       ))}
                     </Stagger>
-                    <Button
-                      asChild
-                      size="lg"
+                    <BookRoomButton
+                      roomSlug={room.slug}
                       className={cn(
-                        "mt-3 h-14 rounded-2xl border text-xs font-semibold tracking-widest uppercase shadow-lg transition-all hover:scale-[1.02]",
+                        "mt-3 h-14 w-full rounded-2xl border text-xs font-semibold tracking-widest uppercase shadow-lg transition-all hover:scale-[1.02]",
                         theme.buttonStyle,
                       )}
-                    >
-                      <Link href={`/contatti?camera=${room.slug}#richiedi-disponibilita`}>
-                        Richiedi disponibilità
-                        <ArrowRight aria-hidden="true" />
-                      </Link>
-                    </Button>
+                    />
                   </div>
                 </Card>
               </Tilt3D>

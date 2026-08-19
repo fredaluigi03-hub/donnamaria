@@ -55,6 +55,7 @@ export default function HomePage() {
           extension: "webp",
         }}
         primaryCta={{ label: "Prenota Ora", href: "/contatti#richiedi-disponibilita" }}
+        primaryCtaOpensBooking
         secondaryCta={{ label: "Scopri le Camere", href: "/camere" }}
       />
 

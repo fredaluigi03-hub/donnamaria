@@ -13,9 +13,11 @@ export interface RoomAmenity {
   label: string;
 }
 
+export type RoomSlug = "suite-francy" | "domi" | "mery";
+
 /** A single hotel room/suite, the shared data shape behind config/rooms.ts. */
 export interface Room {
-  slug: string;
+  slug: RoomSlug;
   name: string;
   tagline: string;
   shortDescription: string;
@@ -30,6 +32,10 @@ export interface Room {
   coverImage: string;
   gallery: { src: string; alt: string }[];
   amenities: RoomAmenity[];
+  /** € per night — the single source the booking widget and the
+   * reservation API both price from, so what a guest sees while searching
+   * matches what actually gets recorded. */
+  basePricePerNight: number;
 }
 
 /** A single primary navigation entry. */

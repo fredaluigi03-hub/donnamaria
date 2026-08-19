@@ -72,6 +72,7 @@ const privateBathroom: Room["amenities"][number] = {
 export const rooms: Room[] = [
   {
     slug: "suite-francy",
+    basePricePerNight: 160,
     name: "Suite Francy",
     tagline: "Sauna privata e vasca idromassaggio",
     shortDescription:
@@ -136,6 +137,7 @@ export const rooms: Room[] = [
   },
   {
     slug: "domi",
+    basePricePerNight: 140,
     name: "Appartamento Domi",
     tagline: "Living, cucina e comfort per la famiglia",
     shortDescription:
@@ -208,6 +210,7 @@ export const rooms: Room[] = [
   },
   {
     slug: "mery",
+    basePricePerNight: 130,
     name: "Camera Mery",
     tagline: "Camera matrimoniale in toni rosa",
     shortDescription:

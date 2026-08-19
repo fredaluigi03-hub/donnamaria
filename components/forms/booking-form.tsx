@@ -16,12 +16,14 @@ import { GuestPicker } from "@/components/booking/guest-picker";
 import { bookingFormSchema, type BookingFormValues } from "@/utils/validation";
 import { rooms } from "@/config/rooms";
 import { aiDisclosure } from "@/config/site";
-import { addReservation } from "@/lib/admin-store";
 
 /**
  * "Richiesta di disponibilità" — same pattern as contact-form.tsx (React
- * Hook Form + Zod + shadcn inputs). Not a booking engine: this sends an
- * inquiry, it does not process payments or hold a real reservation.
+ * Hook Form + Zod + shadcn inputs), but now a real booking: POSTs to
+ * /api/reservations, which inserts into Supabase. A Postgres exclusion
+ * constraint on the room+date range (see supabase/migrations) is what
+ * actually stops two guests from taking the same room — this form just
+ * surfaces that as a 409 instead of trusting a client-side check.
  *
  * Prefilled from the homepage search widget via query params
  * (?checkIn=&checkOut=&adults=&children=&camera=) when present.
@@ -32,6 +34,7 @@ export function BookingForm() {
   const prefilledAdults = Number(searchParams.get("adults") ?? "2") || 2;
   const prefilledChildren = Number(searchParams.get("children") ?? "0") || 0;
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
@@ -53,33 +56,28 @@ export function BookingForm() {
 
   const adults = useWatch({ control, name: "adults" });
   const children = useWatch({ control, name: "children" });
+  const checkInValue = useWatch({ control, name: "checkIn" });
+  const today = new Date().toISOString().slice(0, 10);
 
   async function onSubmit(values: BookingFormValues) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      const roomObj = rooms.find((r) => r.slug === values.room);
-      const roomSlug =
-        (values.room as "suite-francy" | "domi" | "mery") || "suite-francy";
-
-      addReservation({
-        customerName: values.name,
-        email: values.email,
-        phone: values.phone,
-        roomSlug,
-        roomName: roomObj?.name ?? "Donna Maria Suite",
-        checkIn: values.checkIn || "2026-08-15",
-        checkOut: values.checkOut || "2026-08-18",
-        adults: values.adults,
-        children: values.children,
-        status: "pending",
-        totalPrice: roomSlug === "suite-francy" ? 480 : roomSlug === "domi" ? 380 : 320,
-        notes: values.message,
+      const res = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
       });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setErrorMessage(body.error ?? "Qualcosa è andato storto. Riprova più tardi.");
+        setStatus("error");
+        return;
+      }
 
       setStatus("success");
       reset();
     } catch {
+      setErrorMessage("Qualcosa è andato storto. Riprova più tardi.");
       setStatus("error");
     }
   }
@@ -137,15 +135,27 @@ export function BookingForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="room">Camera preferita</Label>
-          <Select id="room" defaultValue={preselectedRoom} {...register("room")}>
-            <option value="">Nessuna preferenza</option>
+          <Label htmlFor="room">Camera</Label>
+          <Select
+            id="room"
+            defaultValue={preselectedRoom}
+            aria-invalid={!!errors.room}
+            {...register("room")}
+          >
+            <option value="" disabled>
+              Seleziona una camera
+            </option>
             {rooms.map((room) => (
               <option key={room.slug} value={room.slug}>
                 {room.name}
               </option>
             ))}
           </Select>
+          {errors.room && (
+            <p className="text-destructive text-sm" role="alert">
+              {errors.room.message}
+            </p>
+          )}
         </div>
       </div>
 
@@ -155,6 +165,7 @@ export function BookingForm() {
           <Input
             id="checkIn"
             type="date"
+            min={today}
             aria-invalid={!!errors.checkIn}
             {...register("checkIn")}
           />
@@ -170,6 +181,7 @@ export function BookingForm() {
           <Input
             id="checkOut"
             type="date"
+            min={checkInValue || today}
             aria-invalid={!!errors.checkOut}
             {...register("checkOut")}
           />
@@ -235,9 +247,7 @@ export function BookingForm() {
             </p>
           </div>
         )}
-        {status === "error" && (
-          <p className="text-destructive">Qualcosa è andato storto. Riprova più tardi.</p>
-        )}
+        {status === "error" && <p className="text-destructive">{errorMessage}</p>}
       </div>
     </form>
   );

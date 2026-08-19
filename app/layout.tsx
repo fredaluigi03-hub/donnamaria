@@ -8,6 +8,7 @@ import { SmoothScroll } from "@/components/animations/smooth-scroll";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
+import { BookingProvider } from "@/components/booking/booking-provider";
 
 import { LoadingScreen } from "@/components/animations/loading-screen";
 
@@ -29,15 +30,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it" suppressHydrationWarning>
       <body className={cn(fontSans.variable, fontDisplay.variable, "font-sans")}>
         <ThemeProvider>
-          <LoadingScreen />
-          <AmbientBackdrop />
-          <SmoothScroll>
-            <div className="flex min-h-dvh flex-col">
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-          </SmoothScroll>
+          <BookingProvider>
+            <LoadingScreen />
+            <AmbientBackdrop />
+            <SmoothScroll>
+              <div className="flex min-h-dvh flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </SmoothScroll>
+          </BookingProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -17,8 +17,10 @@ import { ScrollScrubSequence } from "@/components/animations/scroll-scrub-sequen
 import { useMounted } from "@/hooks/use-mounted";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useBooking } from "@/components/booking/booking-provider";
 import { MOTION } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import type { RoomSlug } from "@/types";
 
 export interface HeroCta {
   label: string;
@@ -79,6 +81,12 @@ export interface HeroProps {
    */
   scrubFrames?: { basePath: string; count: number; extension?: string };
   primaryCta?: HeroCta;
+  /** When set, `primaryCta` opens the global booking modal instead of
+   * navigating to `primaryCta.href` — pre-filled to this room if given.
+   * `href` is still required (kept as a plain-navigation fallback and for
+   * type simplicity), it just never fires while this is set. */
+  primaryCtaOpensBooking?: boolean;
+  primaryCtaRoomSlug?: RoomSlug;
   secondaryCta?: HeroCta;
   /** "fullscreen" for the homepage; "compact" for room/gallery page headers. */
   variant?: "fullscreen" | "compact";
@@ -107,9 +115,12 @@ export function Hero({
   videoSrc,
   scrubFrames,
   primaryCta,
+  primaryCtaOpensBooking,
+  primaryCtaRoomSlug,
   secondaryCta,
   variant = "fullscreen",
 }: HeroProps) {
+  const { openBooking } = useBooking();
   const shouldReduceMotion = useReducedMotion();
   const mounted = useMounted();
   // `useMediaQuery` is `useSyncExternalStore`-backed, so — unlike
@@ -333,18 +344,28 @@ export function Hero({
                   duration={1}
                   className="mt-3 flex w-full flex-col items-center justify-center gap-3 sm:mt-4 sm:w-auto sm:flex-row sm:gap-6"
                 >
-                  {primaryCta && (
-                    <Button
-                      size="lg"
-                      asChild
-                      className="border-gold/40 hover:shadow-gold/30 h-12 w-full border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-7 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105 sm:h-auto sm:w-auto"
-                    >
-                      <Link href={primaryCta.href}>
+                  {primaryCta &&
+                    (primaryCtaOpensBooking ? (
+                      <Button
+                        size="lg"
+                        onClick={() => openBooking({ roomSlug: primaryCtaRoomSlug })}
+                        className="border-gold/40 hover:shadow-gold/30 h-12 w-full border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-7 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105 sm:h-auto sm:w-auto"
+                      >
                         {primaryCta.label}
                         <ArrowRight aria-hidden="true" />
-                      </Link>
-                    </Button>
-                  )}
+                      </Button>
+                    ) : (
+                      <Button
+                        size="lg"
+                        asChild
+                        className="border-gold/40 hover:shadow-gold/30 h-12 w-full border bg-gradient-to-r from-white via-[#faf6f0] to-[#f3e7d4] px-7 py-3 text-xs font-semibold tracking-widest text-neutral-900 uppercase shadow-[0_10px_30px_-5px_rgba(184,149,106,0.4)] transition-all duration-300 hover:scale-105 sm:h-auto sm:w-auto"
+                      >
+                        <Link href={primaryCta.href}>
+                          {primaryCta.label}
+                          <ArrowRight aria-hidden="true" />
+                        </Link>
+                      </Button>
+                    ))}
                   {secondaryCta && (
                     <Link
                       href={secondaryCta.href}
@@ -390,14 +411,23 @@ export function Hero({
 
             {(primaryCta ?? secondaryCta) && (
               <FadeIn delay={0.25} className="flex flex-wrap gap-3">
-                {primaryCta && (
-                  <Button size="lg" asChild>
-                    <Link href={primaryCta.href}>
+                {primaryCta &&
+                  (primaryCtaOpensBooking ? (
+                    <Button
+                      size="lg"
+                      onClick={() => openBooking({ roomSlug: primaryCtaRoomSlug })}
+                    >
                       {primaryCta.label}
                       <ArrowRight aria-hidden="true" />
-                    </Link>
-                  </Button>
-                )}
+                    </Button>
+                  ) : (
+                    <Button size="lg" asChild>
+                      <Link href={primaryCta.href}>
+                        {primaryCta.label}
+                        <ArrowRight aria-hidden="true" />
+                      </Link>
+                    </Button>
+                  ))}
                 {secondaryCta && (
                   <Button
                     size="lg"
