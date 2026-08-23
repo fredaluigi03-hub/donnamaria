@@ -3,7 +3,7 @@ import { SearchWidget } from "@/components/booking/search-widget";
 import { Container } from "@/components/ui/container";
 import { RoomsShowcase } from "@/components/sections/rooms-showcase";
 import { Features } from "@/components/sections/features";
-import { GalleryPreview } from "@/components/sections/gallery-preview";
+import { GalleryCascade } from "@/components/sections/gallery-cascade";
 import { Testimonials } from "@/components/sections/testimonials";
 import { LocationContact } from "@/components/sections/location-contact";
 import { Cta } from "@/components/sections/cta";
@@ -64,7 +64,7 @@ export default function HomePage() {
       </Container>
 
       <RoomsShowcase />
-      <GalleryPreview />
+      <GalleryCascade />
       <Features className="bg-secondary/30" />
       <Testimonials />
       <LocationContact />
