@@ -15,7 +15,6 @@ import { BackgroundVideo } from "@/components/animations/background-video";
 import { AiTag } from "@/components/ui/ai-disclosure";
 import { ScrollScrubSequence } from "@/components/animations/scroll-scrub-sequence";
 import { useMounted } from "@/hooks/use-mounted";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useBooking } from "@/components/booking/booking-provider";
 import { MOTION } from "@/lib/constants";
@@ -123,24 +122,17 @@ export function Hero({
   const { openBooking } = useBooking();
   const shouldReduceMotion = useReducedMotion();
   const mounted = useMounted();
-  // `useMediaQuery` is `useSyncExternalStore`-backed, so — unlike
-  // `useReducedMotion()` — it's already hydration-safe: React forces the
-  // server snapshot (`false`) on the client's first paint too, and only
-  // reconciles the real value in a later, safe re-render.
-  const isMobile = useMediaQuery("(max-width: 767px)");
   const isFullscreen = variant === "fullscreen";
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
 
-  // On mobile, skip the (heavier) video/frame-sequence entirely and use a
-  // slow Ken Burns on the static poster instead — a deliberate performance
-  // trade-off, not an accident. `mounted` still gates it so `isMobile`'s
-  // eventual real value never causes a DOM-tree hydration mismatch (see the
-  // gates below for the same reasoning). `scrubFrames` wins over `videoSrc`
-  // when both are present.
+  // The scroll-scrubbed sequence runs on mobile too — touch scrolling drives
+  // the same `scrollYProgress`, so the pinned hero behaves identically there.
+  // `mounted` still gates it so post-hydration values never cause a DOM-tree
+  // mismatch (see the gates below for the same reasoning). `scrubFrames` wins
+  // over `videoSrc` when both are present.
   const hasMotionBackground = !!scrubFrames || !!videoSrc;
-  const showScrub =
-    isFullscreen && !!scrubFrames && mounted && !shouldReduceMotion && !isMobile;
+  const showScrub = isFullscreen && !!scrubFrames && mounted && !shouldReduceMotion;
   const showVideo = !!videoSrc && mounted && !shouldReduceMotion && !showScrub;
   const showKenBurns = mounted && !shouldReduceMotion && !showScrub && !showVideo;
 
